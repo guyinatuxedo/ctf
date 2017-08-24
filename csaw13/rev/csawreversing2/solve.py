@@ -1,0 +1,24 @@
+#Establish an array of the encrypted flag one byte hex strings
+enc = [ 0xbb, 0xcc, 0xf5, 0xe9, 0xdc, 0xd1, 0xf7, 0xfd, 0xd6, 0xc8, 0xfc, 0xfa, 0x89, 0xc3, 0xea, 0xe9, 0xd7, 0xc3, 0xed, 0xfc, 0xd7, 0xcf, 0xfb, 0xe1, 0xcf, 0xc2, 0xf8, 0xfa, 0xdf, 0xcf, 0xeb, 0xb2, 0xcb, 0xd7]
+
+#Establish the array of hex strings which will be xoring
+key = [ 0xbb, 0xaa, 0x99, 0x88]
+
+#Establish the string which will store the decrypted flag
+flag = ""
+
+#Establish variables for iteration counting
+i = 0
+j = 0
+
+#Establish the for loop which will do the xoring
+for x in enc:
+    flag += chr(enc[i] ^ key[j])
+    i += 1
+    j += 1
+    #Reset the second iteration counter after four iterations
+    if j > 3:
+        j = 0
+
+#Print the flag
+print flag
