@@ -240,7 +240,7 @@ print end
 #victory: 0xEF2E3558
 ```
 
-One thing to say, we don't have to get the whole output to be equal to `0xEF2E3558`, we just have to get it to end with that hex string (set a breakpoint for `0x08048f80` to see for yourself). With that the next part is finding an input tot that python script, which will give us an output that ends with `0xEF2E3558`. I had a lot of difficulty figuring out how to do it, so I handed it off to my team's crypto expert moniker (here's hist github https://github.com/m0nik3r). He essentially wrote a script that just brute forced it. The script doesn't output exact matches however when you run it through the encryption process, subtract the difference from the output you got and the desired output, and adjust the input accordingly, you will get the correct input:
+One thing to say, we don't have to get the whole output to be equal to `0xEF2E3558`, we just have to get it to end with that hex string (set a breakpoint for `0x08048f80` to see for yourself). With that the next part is finding an input tot that python script, which will give us an output that ends with `0xEF2E3558`. I had a lot of difficulty figuring out how to do it, so I handed it off to my team's crypto expert moniker (here's his github https://github.com/m0nik3r). He essentially wrote a script that just brute forced it. The script doesn't output exact matches however when you run it through the encryption process, subtract the difference from the output you got and the desired output, and adjust the input accordingly, you will get the correct input:
 
 ```
 from __future__ import print_function
@@ -327,4 +327,4 @@ Your key is: x\x84\x0
 [*] Got EOF while reading in interactive
 ```
 
-So you can see we solved the challenge. Since I don't have the key file (and since the server is no longer up) I won't be able to print it, but I found it online and it's `Flag: day 145: they still do not realize this software sucks` (grabbed from http://digitaloperatives.blogspot.com/2013/09/csaw-ctf-2013-reversing.html). Just like that, we Captured the Flag!
+So you can see we solved the challenge. Since I don't have the key file (and since the server is no longer up) I won't be able to print it, but I found it online and it's `Flag: day 145: they still do not realize this software sucks` (grabbed from http://digitaloperatives.blogspot.com/2013/09/csaw-ctf-2013-reversing.html). Thanks again to moniker for his help with this problme (checkout his github https://github.com/m0nik3r),  Just like that, we Captured the Flag!
