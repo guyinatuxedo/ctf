@@ -1,6 +1,6 @@
 # Just Do It!
 
-Unfortunately because of a Calc 3 Final, I had to wait untill the Wenesday after the ctf to solve this.
+Unfortunately because of a Calc 3 Test, I had to wait untill the Wenesday after the ctf to solve this.
 
 Let's take a look at the binary:
 ```
