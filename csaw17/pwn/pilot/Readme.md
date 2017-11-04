@@ -1,4 +1,4 @@
-#Pilot
+# Pilot
 
 Full disclosure, a teammate of mine solved this challenge while I was working on SVC, so I solved this after the competition. In addition to that, the shellcode I used is from this other writeup  of the this challenge:
 
@@ -98,7 +98,7 @@ from pwn import *
 #Establish the target
 target = process('./pilot')
 context.binary = ELF('pilot')
-target = remote("pwn.chal.csaw.io", 8464)
+#target = remote("pwn.chal.csaw.io", 8464)
 
 #Attach gdb
 #gdb.attach(target)
