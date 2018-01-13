@@ -10,3 +10,8 @@ This is where I store CTF writeups I've made.
 + x86: TUCTF/guestbook  Infoleak, PIE, strcpy
 #### Faking Inputs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
+
+## Reverse Engineering (RE)
+
+#### Dynamic Analysis
++ x64: bkp16/re/jit Use gdb to reverse obfuscated program, read breakpoints on input
