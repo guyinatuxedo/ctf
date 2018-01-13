@@ -10,7 +10,7 @@ This is where I store CTF writeups I've made.
 + x86: TUCTF/guestbook  Infoleak, PIE, strcpy
 + x64: AsisFinals2017/Mary_Morton fmt_string Stack Canary Infoleak, "cat flag" string at static address
 ##### Return 2 libc
-+64: AsisFinals2017/Mrs._Hudson Call Scanf, scan in shellcode into memory, call shellcode
++ x64: AsisFinals2017/Mrs._Hudson Call Scanf, scan in shellcode into memory, call shellcode
 #### Faking Inputs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
 
