@@ -151,7 +151,7 @@ payload0 = "0"*120 + p64(gadget) + p64(memory + 0x70) + p64(scanf)
 target.sendline(payload0)
 ```
 
-So the next step is just to send the program the shellcode, and then run it. When we start the scanf call via ROP, the RIP is stored at `0x601078`, and since that is just 120 bytes away from the start of our input (and we have no limit as to the amount of characters we can write), we can just overwrite it and use it to jump to `0x601000`.  With this, we get our second payload:
+So the next step is just to send the program the shellcode, and then run it. When we start the scanf call via ROP, the start of our input is just 120 bytes away from the start of our input (and we have no limit as to the amount of characters we can write), we can just overwrite it and use it to jump to `0x601000`.  With this, we get our second payload:
 
 ```
 #First import pwntools
