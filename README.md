@@ -19,3 +19,5 @@ This is where I store CTF writeups I've made.
 #### Dynamic Analysis
 + x64: bkp16/re/jit Use gdb to reverse obfuscated program, read breakpoints on input
 + x86: other/re/movfuscated Side Channel Attack on Movfuscated program, obfuscation where elf only uses mov instructions
+#### Static Analysis
++ x64: bkp16/re/unholy ruby, python, x64 shared library, xtea encryption/decryption/identification z3
