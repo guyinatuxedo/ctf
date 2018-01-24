@@ -1,4 +1,4 @@
-#movuscated1
+# movuscated1
 
 This challenge is from, and this writeup is based off of https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html
 
