@@ -102,6 +102,70 @@ So we can see that this essentially allows you to perform functions such as crea
 
 ## Reversing
 
+Starting off in the main function, we can see it calls several functions. One of those functions that we can see, appears to be the menu that we are prompted with:
+
+```
+int menu()
+{
+  char *s2; // ST1C_4@10
+  char menu_option; // [sp+A2h] [bp-16h]@2
+  int v3; // [sp+ACh] [bp-Ch]@1
+
+  v3 = *MK_FP(__GS__, 20);
+  while ( 1 )
+  {
+    puts("====================");
+    puts("[l]ist ingredients");
+    puts("[r]ecipe book");
+    puts("[a]dd ingredient");
+    puts("[c]reate recipe");
+    puts("[e]xterminate ingredient");
+    puts("[d]elete recipe");
+    puts("[g]ive your cookbook a name!");
+    puts("[R]emove cookbook name");
+    puts("[q]uit");
+    fgets(&menu_option, 10, stdin);
+    switch ( menu_option )
+    {
+      case 'l':
+        list_ingredients();
+        break;
+      case 'r':
+        recipe_book();
+        break;
+      case 'a':
+        add_ingredient();
+        break;
+      case 'c':
+        create_recipe();
+        break;
+      case 'g':
+        name_cookbook();
+        break;
+      case 'R':
+        remove_cookbook();
+        break;
+      case 'q':
+        puts("goodbye, thanks for cooking with us!");
+        return *MK_FP(__GS__, 20) ^ v3;
+      case 'e':
+        s2 = (char *)calloc(0x80u, 1u);
+        printf("which ingredient to exterminate? ");
+        fgets(s2, 128, stdin);
+        s2[strcspn(s2, "\n")] = 0;
+        sub_80497F9(s2);
+        free(s2);
+        break;
+      default:
+        puts("UNKNOWN DIRECTIVE");
+        break;
+    }
+  }
+}
+```
+
+Let's look through each of the options starting with `l`:
+
 ```
 int list_ingredients()
 {
