@@ -1,5 +1,14 @@
 # Cookbook
 
+This writeup is based off of this writeup with multiple parts. It is seriously one of the best writeups I have ever seen:
+```
+This exploit is based off of this writeup with multiple parts (one of the best writeups I ever saw):
+https://www.youtube.com/watch?v=f1wp6wza8ZI
+https://www.youtube.com/watch?v=dnHuZLySS6g
+https://www.youtube.com/watch?v=PISoSH8KGVI
+link to exploit: https://gist.github.com/LiveOverflow/dadc75ec76a4638ab9ea#file-cookbook-py-L20
+```
+
 When we extract the tar archive, we see that we have an x86 elf and a libc file. Let's see what the elf does:
 
 ```
