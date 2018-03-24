@@ -1,4 +1,4 @@
-#Jit In My Pants
+# Jit In My Pants
 
 Let's take a look at the binary:
 
@@ -13,7 +13,7 @@ Nope.
 
 So it appears that we are dealing  with a 64 bit elf that simply requests input, checks it, and then tells us how bad we are. There are multiple ways to solve this. 
 
-#Dynamic Analysis
+# Dynamic Analysis
 
 This challenge can be solved with running it in gdb. Looking at the code in IDA, it is clear that the code has been obfuscated. Let's try just setting a read breakpoint for our input, and then seeing how our input is checked:
 
