@@ -23,3 +23,4 @@ This is where I store CTF writeups I've made.
 + x86: other/re/movfuscated Side Channel Attack on Movfuscated program, obfuscation where elf only uses mov instructions
 #### Static Analysis
 + x64: bkp16/re/unholy ruby, python, x64 shared library, xtea encryption/decryption/identification z3
++ x86: defcon-quals-2018/elf-crumble x86, opcodes, patching, common x86 knowledge
