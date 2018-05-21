@@ -78,7 +78,7 @@ Nope.
 Also we can specify what privilege level we want to view the events (so count the number of instructions that run at the user level `:u` or the kernel level `:k`, or the user level `k`):
 
 ```
-sudo perf stat -x : -e instructions:u ./movfuscated1 
+$	sudo perf stat -x : -e instructions:u ./movfuscated1 
 M/o/Vfuscator 2.0a // domas // @xoreaxeaxeax
 Enter the key: 15935728 
 Nope.
