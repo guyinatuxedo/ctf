@@ -25,5 +25,8 @@ This is where I store CTF writeups I've made.
 #### Static Analysis
 + x64: bkp16/re/unholy ruby, python, x64 shared library, xtea encryption/decryption/identification z3
 + x86: defcon-quals-2018/elf-crumble x86, opcodes, patching, common x86 knowledge
++ x64: RCTF/re/sign strings
+#### Static and Dynamic Analysis
++ x86: RCTF/re/babyre figure out what's important/what's not, one to one function for each character
 #### Code Review
 + asis18quals/re/warmup:  Cleaning up code, editing source code
