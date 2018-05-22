@@ -28,5 +28,6 @@ This is where I store CTF writeups I've made.
 + x64: RCTF/re/sign strings
 #### Static and Dynamic Analysis
 + x86: RCTF/re/babyre figure out what's important/what's not, one to one function for each character
++ x86: Asis18Quals/re/babyc Movfuscation, Demovfuscator, program obfuscation
 #### Code Review
 + asis18quals/re/warmup:  Cleaning up code, editing source code
