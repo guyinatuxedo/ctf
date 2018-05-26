@@ -32,3 +32,11 @@ This is where I store CTF writeups I've made.
 + x86: Asis18Quals/re/babyc Movfuscation, Demovfuscator, program obfuscation
 #### Code Review
 + asis18quals/re/warmup:  Cleaning up code, editing source code
+
+## Non-Challenges Pwn
+#### Heap
++ shellphish_how2heap/first_fit Block reuse after free
++ shellphish_how2heap/fastbin_dup Double Free to return same pointer twice
++ shellphish_how2heap/fastbin_dup_into_stack Double Free to return same ptr twice, use that to have malloc return stack ptr
+
+
