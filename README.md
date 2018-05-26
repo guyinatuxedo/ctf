@@ -37,6 +37,6 @@ This is where I store CTF writeups I've made.
 #### Heap
 + shellphish_how2heap/first_fit Block reuse after free
 + shellphish_how2heap/fastbin_dup Double Free to return same pointer twice
-+ shellphish_how2heap/fastbin_dup_into_stack Double Free to return same ptr twice, use that to have malloc return stack ptr
++ shellphish_how2heap/fastbin_dup_into_stack Double Free to return same ptr twice, use that to return return stack ptr from malloc
 
 
