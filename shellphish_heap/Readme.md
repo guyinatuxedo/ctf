@@ -1,0 +1,1 @@
+These aren't directly from a ctf, however the content in here does greatly deal with ctfs. This is from a github repo from the CTF team Shellphis that essentially teaches a lot of different heap attacks which can be found here: https://github.com/shellphish/how2heap. Essentially this is just a series of writeups for those sections.
