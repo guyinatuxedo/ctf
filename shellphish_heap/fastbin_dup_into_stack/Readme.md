@@ -1,5 +1,7 @@
 # Shellphish how2heap fastbin_dup_into_stack
 
+For a challenge related to this section: https://github.com/guyinatuxedo/ctf/tree/master/0ctf/pwn/babyheap
+
 This is another section off of the Shellphish how2heap gitbhub repo, which well documents itself in addition to providing the source code for these sections. 
 
 This time we will be using a double free to have malloc return a pointer outside of the heap and to the stack.
