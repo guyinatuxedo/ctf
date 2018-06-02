@@ -11,6 +11,7 @@ This is where I store CTF writeups I've made.
 + x64: 0ctf/pwn/babyheap Heap Overflow, Chunk Consolidation and fastbin duplication into libc, oneshot
 + x64: RCTF/pwn/babyheap One Null Byte Overflow, chunk consolidation, double free, libc file
 + x64: asis18quals/pwn/cat Use After Free, creating format string bug, format string. got/plt addresses
++ x64: Hitcon16/pwn/SleepyHolder Double Free, fastin duplication consolidation, unsafe unlink, overwrite got address, infoleak
 #### Return 2 System
 + x86: TUCTF/guestbook  Infoleak, PIE, strcpy
 + x64: AsisFinals2017/Mary_Morton fmt_string Stack Canary Infoleak, "cat flag" string at static address
@@ -39,5 +40,6 @@ This is where I store CTF writeups I've made.
 + shellphish_how2heap/first_fit: Block reuse after free
 + shellphish_how2heap/fastbin_dup: Double Free to return same pointer twice
 + shellphish_how2heap/fastbin_dup_into_stack: Double Free to return same ptr twice, use that to return return stack ptr from malloc
++ shellphish_how2heap/fastbin_dup_consolidate: Double free to same ptr twice, allocate large chunk in between to move ptr out of fastbin list to pass malloc() check
 
 
