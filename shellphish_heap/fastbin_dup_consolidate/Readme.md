@@ -1,6 +1,7 @@
 # Shellphish how2heap fastbin_dup_consolidate
 This is another section from the CTF team Shellphish's well documented section on heap exploitation. This section covers fastbin duplication without having to free a third chunk while doing the double free.
 
+For a look at a ctf challenge that uses this, check out: https://github.com/guyinatuxedo/ctf/tree/master/Hitcon16/pwn/sleepyholder
 
 First we allocate two seperate fast bins:
 ```
