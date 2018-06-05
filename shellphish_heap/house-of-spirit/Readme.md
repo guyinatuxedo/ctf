@@ -2,6 +2,8 @@
 
 This is another section of the CTF team Shellphish's how2heap educational github repo. This time, we are focusing on the House of Spirit attack.
 
+For a look at a ctf challenge which uses this technique: https://github.com/guyinatuxedo/ctf/tree/master/hack.lu14/pwn/oreo
+
 The goal of this is to get malloc to return a pointer to a that we control (it can be in the heap, stack, or anywhere that we can write to). It will require us to make two fake chunks, by writing two eight byte integers. After that we just need to overwrite a ptr to the first fake chunk, and free it.
 
 ## Exploit Process
