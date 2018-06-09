@@ -39,6 +39,8 @@ Now chunk `1` is still an unsorted bin. If we were to allocate a space of `0x178
 
 Now after writing `0x100` byes to chunk `3`, we will be right at the content section of chunk `2`. You can change the value of chunk `2` by changing the value of chunk `3`, and you can change the value of chunk `3` (anything past 0x100 bytes into it) by changin the value of chunk `2` (which the program demonstrates). We can also write to the metadata for chunk `2`. All of this is helpful since it can (and probably will)  allow us to edit data in the heap in ways that we shouldn't (and we might be able to get code execution from it). 
 
+## Program Running
+
 Here is a copy of the program running:
 
 ```
