@@ -49,3 +49,4 @@ This is where I store CTF writeups I've made.
 + shellphish_how2heap/house-of-spirit:  Get malloc to return a pointer to the stack, by creating fake chunks on the stack, and overwriting freed heap small bin `bk` pointer to second fake stackc chunk.
 + shellphish_how2heap/overlapping_chunks: Get malloc to return a freed chunk (unsorted bin) that overlaps with another chunk, by overwriting the size value of the freed chunk
 + shellphish_how2heap/overlapping_chunk_2: Get malloc to return a freed chunk that encompases another chunk, by overwriting the size value of an allocated chunk
++ shellphis_how2heap/house-of-power:  Get malloc to allocate space outside of the heap by editing the Wilderness Value, after that edit memory outside of the heap.
