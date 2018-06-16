@@ -50,4 +50,5 @@ This is where I store CTF writeups I've made.
 + shellphish_how2heap/overlapping_chunks: Get malloc to return a freed chunk (unsorted bin) that overlaps with another chunk, by overwriting the size value of the freed chunk
 + shellphish_how2heap/overlapping_chunk_2: Get malloc to return a freed chunk that encompases another chunk, by overwriting the size value of an allocated chunk
 + shellphish_how2heap/house-of-power:  Get malloc to allocate space outside of the heap by editing the Wilderness Value, after that edit memory outside of the heap.
-+ shellphish_how2heap/unsorted_bin_into_stack: Only works if glibc option `tcache-option` is disabled. Get malloc to return pointer to stack by overwriting data for unsorted bin.
++ shellphish_how2heap/unsorted_bin_into_stack: Only works if compiled with glibc option `tcache-option` disabled. Get malloc to return pointer to stack by overwriting data for unsorted bin.
++ shellphish_how2heap/unsorted_bin_attack: Only works if compiled with glibc option `tcache-option` disabled. Get write to stack value by allocating unsorted bin with overwritten bk pointer.
