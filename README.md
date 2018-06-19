@@ -23,6 +23,9 @@ This is where I store CTF writeups I've made.
 #### Faking Inputs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
 
+#### Stack
++ x64: googlequals17/pwn/wiki vsyscall, PIE, buffer overflow, no verbose output
+
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
