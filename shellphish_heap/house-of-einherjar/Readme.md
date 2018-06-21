@@ -38,11 +38,11 @@ next we will execute an attack where we can write over the last byte of the size
 1:	0xf8 previous_in_use bit = 0 with null byte overflow from chunk 0	:0x556a4b364050
 ```
 
-For the next step, we will write a fake previous size to chunk `0`. The idea of this being that when we write the fake size to chunk `0`, we will then free chunk `1`. Since we overwrote the `previous_in_use_bit` to be `0x0`, when we free chunk `1` it will think that chunk `0` is also free. It will try to consolidate the chunk with the last chunk, which if we overflow the `previous_size` value for chunk `0` to be the difference between our fake chunk on the stack and chunk `1`, it will consolidate the chunk to the fake stack. Our fake chunk is at `0x7fffbea426f0`, and chunk `1` is at `0x556a4b364040` (when you factor in the `0x10` bytes of heap metadata) so the `previous_size` will be `0x556a4b364040 - 0x7fffbea426f0 = 0xffffd56a8c921950`:
+For the next step, we will write a fake previous size to chunk `0`. The idea of this being that when we write the fake size to chunk `0`, we will then free chunk `1`. Since we overwrote the `previous_in_use_bit` to be `0x0`, when we free chunk `1` it will think that chunk `0` is also free. It will try to consolidate the chunk with the last chunk, which if we overflow the `previous_size` value for chunk `1` to be the difference between our fake chunk on the stack and chunk `1`, it will consolidate the chunk to the fake stack. Our fake chunk is at `0x7fffbea426f0`, and chunk `1` is at `0x556a4b364040` (when you factor in the `0x10` bytes of heap metadata) so the `previous_size` will be `0x556a4b364040 - 0x7fffbea426f0 = 0xffffd56a8c921950`:
 
 ```
-0:	0x38 previous_size overwritten to 0xffffd56a8c921950						:0x556a4b364010
-1:	0xf8 previous_in_use bit = 0 with null byte overflow from chunk 0			:0x556a4b364050
+0:	0x38 						:0x556a4b364010
+1:	0xf8 previous_size overwritten to 0xffffd56a8c921950 & previous_in_use bit = 0 with null byte overflow from chunk 0			:0x556a4b364050
 ```
 
 With that setup, we can now free chunk `1` and consolidate the heap to the fake chunk:
