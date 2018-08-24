@@ -21,7 +21,9 @@ This is where I store CTF writeups I've made.
 + x64: AsisFinals2017/Mary_Morton fmt_string Stack Canary Infoleak, "cat flag" string at static address
 ##### Return 2 libc
 + x64: AsisFinals2017/Mrs._Hudson Call Scanf, scan in shellcode into memory, call shellcode
-#### Faking Inputs
+#### Custom malloc / memory allocation
++ x64: Csaw17/pwn/zone allocates memory with mmap, handles it with custom functions to handle allocating / freeing memory from memory obtained through mmap
+#### Faking Heap Ptrs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
 
 #### Stack
