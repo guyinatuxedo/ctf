@@ -5,6 +5,7 @@ This is where I store CTF writeups I've made.
 ## Pwn
 
 #### ROP Chain
++ x64: TokyoWesterns18/pwn/load scan in contents of file to buffer overflow, used /proc/self/fd/0 as stdin, use ROP Chain to open up STDOUT and the flag file, read contents of the flag file, and print it with puts
 + x64: bkp16/pwn/simple-calc Basic ROP Chain, syscall to execve("/bin/sh", NULL, NULL), Weird method of writing data to memeory
 + x32: defconquals16/pwn/feedme ROP Chain syscall to execve("/bin/sh", NULL, NULL), brute force stack canary, stripped elf
 #### Heap
