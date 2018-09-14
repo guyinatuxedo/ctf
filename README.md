@@ -34,6 +34,7 @@ This is where I store CTF writeups I've made.
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
++ x64: csaw17/re/bananascript reverse custom interpreter/programming language, gdb init, brute force solution with itertools
 + x64: bkp16/re/jit Use gdb to reverse obfuscated program, read breakpoints on input
 + x86: other/re/movfuscated Side Channel Attack on Movfuscated program, obfuscation where elf only uses mov instructions
 + 16 bit: csaw17/re/realism Reverse 16 bit i8086 Master Boot Record. Get to deal with registers like xmm0 and instructions like psadbw (compute sum of absolute differences) Use z3 to solve.
