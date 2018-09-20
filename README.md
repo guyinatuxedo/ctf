@@ -30,7 +30,7 @@ This is where I store CTF writeups I've made.
 
 #### Stack
 + x64: googlequals17/pwn/wiki vsyscall, PIE, buffer overflow, no verbose output
-
++ x64: Csaw18/pwn/get_it simple buffer overflow with gets to call a different function
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
