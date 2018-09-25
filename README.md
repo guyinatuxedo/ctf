@@ -27,7 +27,8 @@ This is where I store CTF writeups I've made.
 + x64: Csaw17/pwn/zone allocates memory with mmap, handles it with custom functions to handle allocating / freeing memory from memory obtained through mmap
 #### Faking Heap Ptrs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
-
+#### Bad Checks
++ x64: csaw18/pwn/doubletrouble bad check allows you to overwrite index size, sorting algorithm moves values into return address, get to deal with floats (we all float down here)
 #### Stack
 + x64: googlequals17/pwn/wiki vsyscall, PIE, buffer overflow, no verbose output
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
