@@ -49,6 +49,8 @@ This is where I store CTF writeups I've made.
 + x64: bkp16/re/unholy ruby, python, x64 shared library, xtea encryption/decryption/identification z3
 + x86: defcon-quals-2018/elf-crumble x86, opcodes, patching, common x86 knowledge
 + x64: RCTF/re/sign strings
++ x86: csaw2018/rev/tour_of_x86_pt1 basic x86 reading, well commented walkthrough
++ x86: csaw2018/rev/tour_of_x86_pt2 basic x86 patching, run binary with qemu
 #### Static and Dynamic Analysis
 + x86: RCTF/re/babyre figure out what's important/what's not, one to one function for each character
 + x86: Asis18Quals/re/babyc Movfuscation, Demovfuscator, program obfuscation
