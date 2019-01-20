@@ -57,7 +57,7 @@ This is where I store CTF writeups I've made.
 + x86: Asis18Quals/re/babyc Movfuscation, Demovfuscator, program obfuscation
 + x64: Csaw17/rev/tablEZ Simple lookup table
 + x86: TokyoWesterns/re/rev-rev-rev Z3 problem, takes in input, runs it through an algorithm, compares against predefined output
-+ x64: insomnihack18/rev/beginner-reverse: written in rust, figuring out which checks we need to pass, standard take in input check one character at a time
++ x64: insomnihack18-teaser/rev/beginner-reverse: written in rust, figuring out which checks we need to pass, standard take in input check one character at a time
 #### Code Review
 + asis18quals/re/warmup:  Cleaning up code, editing source code
 
