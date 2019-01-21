@@ -22,6 +22,7 @@ This is where I store CTF writeups I've made.
 #### Return 2 System
 + x86: TUCTF/guestbook  Infoleak, PIE, strcpy
 + x64: AsisFinals2017/Mary_Morton fmt_string Stack Canary Infoleak, "cat flag" string at static address
++ x86: hxp2018/poor_canary Arm buffer overflow, call system, arm debugging and disassembly
 ##### Return 2 libc
 + x64: AsisFinals2017/Mrs._Hudson Call Scanf, scan in shellcode into memory, call shellcode
 #### Custom malloc / memory allocation
