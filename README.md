@@ -9,6 +9,8 @@ This is where I store CTF writeups I've made.
 + x64: bkp16/pwn/simple-calc Basic ROP Chain, syscall to execve("/bin/sh", NULL, NULL), Weird method of writing data to memeory
 + x32: defconquals16/pwn/feedme ROP Chain syscall to execve("/bin/sh", NULL, NULL), brute force stack canary, stripped elf
 + x64: insomnihack17/pwn/baby server with child processes, pwntools ROP chain generate, fmt string leak stack canary & libc address, standard buffer overflow
+#### Stack Pivot
++ x64: Insomnihack18-teaser use `_fini_arr` table entries and qword write to loop function on exit, stack pivot, pie and stack infoleaks, single qword write
 #### Heap
 + x64: csaw18/pwn/alien Null byte overflow and arbitrary write to do heap consolidation to leak heap address, then get PIE and libc infoleaks, then write over GOT entry of strtoul with system
 + x86: bkp16/pwn/cookbook Use After Free, House of Power exploit, expand heap into libc, write over free hook with system address, call free with pointer to "/bin/sh", libc and heap address leaks, reversing structs
