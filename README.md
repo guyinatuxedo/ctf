@@ -21,6 +21,7 @@ This is where I store CTF writeups I've made.
 + x86: hack.lu14/pwn/oreo House of Spirit, heap overflow for libc infoleak, allocate heap chunk with malloc to bss
 + x64: csaw17/pwn/auir Fast bin attack, heap consolidation, libc leak, allocate fake chunk in bss
 + x64: hacklu17/pwn/exam Heap Consolidation, Single Byte Overflow
++ x64: hackIM19/pwn/shop Use after free, format string write to GOT table, libc infoleak
 #### Return 2 System
 + x86: TUCTF/guestbook  Infoleak, PIE, strcpy
 + x64: AsisFinals2017/Mary_Morton fmt_string Stack Canary Infoleak, "cat flag" string at static address
@@ -61,6 +62,8 @@ This is where I store CTF writeups I've made.
 + x64: Csaw17/rev/tablEZ Simple lookup table
 + x86: TokyoWesterns/re/rev-rev-rev Z3 problem, takes in input, runs it through an algorithm, compares against predefined output
 + x64: insomnihack18-teaser/rev/beginner-reverse: written in rust, figuring out which checks we need to pass, standard take in input check one character at a time
+#### Cryptoish
++ x64: insomnihack18-teaser/junkyard AES Crypto encryption, reverse binary to find Ciphertext and IV, and find key format, brute force key
 #### Code Review
 + asis18quals/re/warmup:  Cleaning up code, editing source code
 
