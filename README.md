@@ -10,7 +10,7 @@ This is where I store CTF writeups I've made.
 + x32: defconquals16/pwn/feedme ROP Chain syscall to execve("/bin/sh", NULL, NULL), brute force stack canary, stripped elf
 + x64: insomnihack17/pwn/baby server with child processes, pwntools ROP chain generate, fmt string leak stack canary & libc address, standard buffer overflow
 #### Stack Pivot
-+ x64: Insomnihack18-teaser use `_fini_arr` table entries and qword write to loop function on exit, stack pivot, pie and stack infoleaks, single qword write
++ x64: Insomnihack18-teaser/onewrite use `_fini_arr` table entries and qword write to loop function on exit, stack pivot, pie and stack infoleaks, single qword write
 #### Format String
 + x64: hackIM19/pwn/babypwn Format String, Signed/Unsigned bug, fmt string libc infoleak with %s, LD_PRELOAD, id remote libc file, get scanf not to write over a value
 #### Heap
