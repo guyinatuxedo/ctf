@@ -45,6 +45,8 @@ This is where I store CTF writeups I've made.
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
 + x64: Csaw18/pwn/get_it simple buffer overflow with gets to call a different function
 + x64: Csaw18/pwn/get_it simple buffer overflow hidword on the stack
+#### Crafting Shellcode
++ x64: hackIM19/pwn/easyshell craft alphanumeric shellocde that also gets around seccomp rules, pie breakpoints 
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
