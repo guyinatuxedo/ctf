@@ -42,12 +42,12 @@ This is where I store CTF writeups I've made.
 + x64: csaw18/pwn/turtles objective C, pop registers to move rop chain into stack, ROP calls to printf for infoleak, and libc system
 #### Stack
 + x64: googlequals17/pwn/wiki vsyscall, PIE, buffer overflow, no verbose output
-+ x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
 + x64: Csaw18/pwn/get_it simple buffer overflow with gets to call a different function
 + x64: Csaw18/pwn/get_it simple buffer overflow hidword on the stack
 #### Crafting Shellcode
 + x64: hackIM19/pwn/easyshell craft alphanumeric shellocde self-modifying shellcode that also gets around seccomp rules, pie breakpoints 
 + x64: hackIM19/pwn/peasy-shell craft self-modifying shellcode to bypass character and seccomp restrictions, sequel to easyshell
++ x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
