@@ -34,6 +34,8 @@ This is where I store CTF writeups I've made.
 #### Custom malloc / memory allocation
 + x86: Csaw17/pwn/minesweeper custom malloc, abuse overflow to get write what where with delinking function, also get stack and heap infoleak
 + x64: Csaw17/pwn/zone allocates memory with mmap, handles it with custom functions to handle allocating / freeing memory from memory obtained through mmap
+#### Shellcode
++ x86: defconQuals18/pwn/nop write shellcode with limited instructions, popa instruction call
 #### Faking Heap Ptrs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
 #### Bad Checks
