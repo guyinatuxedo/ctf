@@ -34,8 +34,6 @@ This is where I store CTF writeups I've made.
 #### Custom malloc / memory allocation
 + x86: Csaw17/pwn/minesweeper custom malloc, abuse overflow to get write what where with delinking function, also get stack and heap infoleak
 + x64: Csaw17/pwn/zone allocates memory with mmap, handles it with custom functions to handle allocating / freeing memory from memory obtained through mmap
-#### Shellcode
-+ x86: defconQuals18/pwn/nop write shellcode with limited instructions, popa instruction call
 #### Faking Heap Ptrs
 + x64: bkp16/pwn/complex-calc pass false pointer to free and not crash, pointer is to bss
 #### Bad Checks
@@ -48,6 +46,7 @@ This is where I store CTF writeups I've made.
 + x64: Csaw18/pwn/get_it simple buffer overflow with gets to call a different function
 + x64: Csaw18/pwn/get_it simple buffer overflow hidword on the stack
 #### Crafting Shellcode
++ x86: defconQuals18/pwn/nop write shellcode with limited instructions, popa instruction call
 + x64: hackIM19/pwn/easyshell craft alphanumeric shellocde self-modifying shellcode that also gets around seccomp rules, pie breakpoints 
 + x64: hackIM19/pwn/peasy-shell craft self-modifying shellcode to bypass character and seccomp restrictions, sequel to easyshell
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
