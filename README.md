@@ -50,6 +50,8 @@ This is where I store CTF writeups I've made.
 + x64: hackIM19/pwn/easyshell craft alphanumeric shellocde self-modifying shellcode that also gets around seccomp rules, pie breakpoints 
 + x64: hackIM19/pwn/peasy-shell craft self-modifying shellcode to bypass character and seccomp restrictions, sequel to easyshell
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
+#### Sigreturn
++ x64: backdoorctf/pwn/funsignals Use Sigreturn syscall to run a write syscall to print flag
 ## Reverse Engineering (RE)
 
 #### Dynamic Analysis
