@@ -1,3 +1,5 @@
+# This is not finished, and is still being worked on
+
 # Baby Aegis
 
 When we take a look at the binary, we see this:
