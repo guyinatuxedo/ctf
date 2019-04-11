@@ -80,6 +80,8 @@ This is where I store CTF writeups I've made.
 + x64: Csaw17/rev/tablEZ Simple lookup table
 + x86: TokyoWesterns/re/rev-rev-rev Z3 problem, takes in input, runs it through an algorithm, compares against predefined output
 + x64: insomnihack18-teaser/rev/beginner-reverse: written in rust, figuring out which checks we need to pass, standard take in input check one character at a time
+#### Angr
++ x64: securityfest/fairlight Use Angr to solve basic crackme
 #### Cryptoish
 + x64: insomnihack18-teaser/junkyard AES Crypto encryption, reverse binary to find Ciphertext and IV, and find key format, brute force key
 #### Code Review
