@@ -56,7 +56,7 @@ Starting off I used demovfuscator on it (you can find it here https://github.com
 
 To use it (after you compile it):
 ```
-$	./demov -g graph.dot- o patched future_fun
+$	./demov -g graph.dot -o patched future_fun
 ```
 
 Now since the file `graph.dot` is essentially a text file containing information on a graph, we will have to use `dot` to actually draw it for us:
