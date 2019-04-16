@@ -68,6 +68,7 @@ This is where I store CTF writeups I've made.
 + x86: other/re/movfuscated Side Channel Attack on Movfuscated program, obfuscation where elf only uses mov instructions
 + 16 bit: csaw17/re/realism Reverse 16 bit i8086 Master Boot Record. Get to deal with registers like xmm0 and instructions like psadbw (compute sum of absolute differences) Use z3 to solve.
 + x64: swampctf19/re/future Movfuscation, use Demovfuscator, solve using side channel attack with Perf
++ x64: plaid19/re/plaid_party_planning_III jump past code giving issues to get flag (unintended solution) 
 #### Static Analysis
 + x64: bkp16/re/unholy ruby, python, x64 shared library, xtea encryption/decryption/identification z3
 + x86: defcon-quals-2018/elf-crumble x86, opcodes, patching, common x86 knowledge
