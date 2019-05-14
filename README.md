@@ -9,6 +9,7 @@ This is where I store CTF writeups I've made.
 + x64: bkp16/pwn/simple-calc Basic ROP Chain, syscall to execve("/bin/sh", NULL, NULL), Weird method of writing data to memeory
 + x32: defconquals16/pwn/feedme ROP Chain syscall to execve("/bin/sh", NULL, NULL), brute force stack canary, stripped elf
 + x64: insomnihack17/pwn/baby server with child processes, pwntools ROP chain generate, fmt string leak stack canary & libc address, standard buffer overflow
++ x64: defconquals2019/speedrun/s1 Buffer overlow, ROP Chain to execve syscall, statically linked no PIE or Stack Canary
 #### Stack Pivot
 + x64: Insomnihack18-teaser/onewrite use `_fini_arr` table entries and qword write to loop function on exit, stack pivot, pie and stack infoleaks, single qword write
 #### Format String
