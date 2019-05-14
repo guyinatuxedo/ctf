@@ -2,6 +2,8 @@
 
 Full disclosure, I was not the one who solved this for my team (I was too slow). However I solved it after the competition, and this is how I did it (although I did this by hand, and some teams probably had auto-pwn tools to help them solve it quickly). 
 
+Also for this challenge to work properly, you will be needing to use the libc version `libc-2.27.so` (Ubuntu 18.04) or adjust it to match your own libc version.
+
 Let's take a look at the binary:
 
 ```
