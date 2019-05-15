@@ -57,12 +57,16 @@ This is where I store CTF writeups I've made.
 + x64: hackIM19/pwn/easyshell craft alphanumeric shellocde self-modifying shellcode that also gets around seccomp rules, pie breakpoints 
 + x64: hackIM19/pwn/peasy-shell craft self-modifying shellcode to bypass character and seccomp restrictions, sequel to easyshell
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
++ x64: ctf/defconquals2019/speedrun/s3/ Modify shellcode to meet length / xor requirments
 #### Sigreturn
 + x64: backdoorctf/pwn/funsignals Use Sigreturn syscall to run a write syscall to print flag
 #### Index Check
 + swampctf19/pwn/dream_heaps:	Abuse vulnerable index checks and pointer array overflow for got table overwrite
 #### File Struct
 + swampctf19/pwn/bad_file: Oerwrite file struct to get code execution, Use After Free
+#### Timing Attack
++ defconquals2019/speedrun/s11/: Craft shellcode to leak flag one bit at a time using timing attack, autoomate the process
+
 
 ## Reverse Engineering (RE)
 
