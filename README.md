@@ -58,6 +58,7 @@ This is where I store CTF writeups I've made.
 + x64: hackIM19/pwn/peasy-shell craft self-modifying shellcode to bypass character and seccomp restrictions, sequel to easyshell
 + x64: Csaw18/pwn/shellpointcode write custom shellcode to fit in disconnected blocks, buffer overflow to get return address, get free stack leak
 + x64: ctf/defconquals2019/speedrun/s3/ Modify shellcode to meet length / xor requirments
++ x64: ctf/defconquals2019/speedrun/s3/ Write shellcode to scan in additional shellcode and meet length, no null byte, all registers cleared (except rip), extra opcdes inserted restrictions, use secondary shellcode to get shell
 #### Sigreturn
 + x64: backdoorctf/pwn/funsignals Use Sigreturn syscall to run a write syscall to print flag
 #### Index Check
