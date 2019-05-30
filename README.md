@@ -94,6 +94,7 @@ This is where I store CTF writeups I've made.
 + x64: Csaw17/rev/tablEZ Simple lookup table
 + x86: TokyoWesterns/re/rev-rev-rev Z3 problem, takes in input, runs it through an algorithm, compares against predefined output
 + x64: insomnihack18-teaser/rev/beginner-reverse: written in rust, figuring out which checks we need to pass, standard take in input check one character at a time
++ x64: bkp16/re/frogger gmp library, factoring math
 #### Angr
 + x86: plaid19/re/icancount Use Angr to solve cracke, evaluates input one byte at a time, 19 bytes between 0x30 - 0x39, input via stdin
 + x64: securityfest/fairlight Use Angr to solve basic crackme
