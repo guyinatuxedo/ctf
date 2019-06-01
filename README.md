@@ -16,6 +16,7 @@ This is where I store CTF writeups I've made.
 #### Format String
 + x64: hackIM19/pwn/babypwn Format String, Signed/Unsigned bug, fmt string libc infoleak with %s, LD_PRELOAD, id remote libc file, get scanf not to write over a value
 + x86: backdoorctf/bbpwn Format String, got overwrite, system imported function
++ x86: tokyowesterns16/pwn/greeting Format String, .fini_array write to cause loop back, overwrite got address with plt system
 #### Heap
 + x64: defconquals2018/pwn/itsame C++ vector function pointer overwrite, use after free, libc/heap infoleak, heap overflow
 + x64: defconquals2018/pwn/racewars Custom Malloc, onegadget, libc + heap infoleak
