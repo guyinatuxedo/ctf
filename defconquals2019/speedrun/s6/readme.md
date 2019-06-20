@@ -135,7 +135,7 @@ __int64 __fastcall shellcode_it(__int64 a1)
 }
 ```
 
-So this function will run our shellcode. However before it does that it will alter our shellcode. It will append a bunch of xor statements before our shellcode, which will clear out all of the registers except for the rip register (this includes rsp, so we can't push/pop without crashing). In addition to that, it will insert the `0xcc` byte four times throughout our shellcode (at offsets 5, 9, 18, & 26)
+So this function will run our shellcode. However before it does that it will alter our shellcode. It will append a bunch of xor statements before our shellcode, which will clear out all of the registers except for the rip register (this includes rsp, so we can't push/pop without crashing). In addition to that, it will insert the `0xcc` byte four times throughout our shellcode (at offsets 5, 10, 20, & 29)
 
 So what I ended up doing was using two sets of shellcode. The first was just to make a syscall to read to scan in additional shellcode (since the shellcode to pop a shell would be harder to fit in due to the constraints). Then I would just scan in the shellcode to pop a shell without the size / no null bytes / 0xcc inserted restrictions, and then jump to it. I tried for a little bit to just get the shell using only one set of shellcode, however I couldn't do it.
 
