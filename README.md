@@ -1,5 +1,7 @@
 # ctf
 
+If you would like a pwn/re ctf course, check out: https://github.com/guyinatuxedo/nightmare
+
 This is where I store CTF writeups I've made. 
 
 ## Pwn
