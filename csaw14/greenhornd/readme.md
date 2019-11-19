@@ -3,7 +3,9 @@
 This writeup is based off of:
 ```
 https://www.hackucf.org/csaw-2014-exploitation-400-greenhornd-exe/
+
 some of noopnoop's work
+noop didn't make the writeup linked above, he just helped me exploit this
 ```
 
 If it sucks, I'm sorry, I don't have a lot of windows exploitation experience.
