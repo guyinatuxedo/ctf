@@ -19,6 +19,7 @@ This is where I store CTF writeups I've made.
 + x64: hackIM19/pwn/babypwn Format String, Signed/Unsigned bug, fmt string libc infoleak with %s, LD_PRELOAD, id remote libc file, get scanf not to write over a value
 + x86: backdoorctf/bbpwn Format String, got overwrite, system imported function
 + x86: tokyowesterns16/pwn/greeting Format String, .fini_array write to cause loop back, overwrite got address with plt system
++ x86: tu19/vulnmath/ use fmt string bug to get libc infoleak, then got overwrite
 #### Heap
 + x64: defconquals2018/pwn/itsame C++ vector function pointer overwrite, use after free, libc/heap infoleak, heap overflow
 + x64: defconquals2018/pwn/racewars Custom Malloc, onegadget, libc + heap infoleak
@@ -62,6 +63,7 @@ This is where I store CTF writeups I've made.
 + x64: Csaw18/pwn/get_it simple buffer overflow hidword on the stack
 + x86: TokyoWesterns/just_do_it simple buffer overflow of puts pointer
 + x86: Csaw13/pwn/exploit1 overwrite variable on stack
++ x86: tu19/thefirst simple buffer overflow with gets to call a different function
 #### Crafting Shellcode
 + x86: defconQuals18/pwn/nop write shellcode with limited instructions, popa instruction call
 + x64: hackIM19/pwn/easyshell craft alphanumeric shellocde self-modifying shellcode that also gets around seccomp rules, pie breakpoints 
@@ -77,7 +79,8 @@ This is where I store CTF writeups I've made.
 + swampctf19/pwn/bad_file: Oerwrite file struct to get code execution, Use After Free
 #### Timing Attack
 + defconquals2019/speedrun/s11/: Craft shellcode to leak flag one bit at a time using timing attack, autoomate the process
-
+#### misc
++ x86: tu19/runme run the binary
 #### Windows
 + csaw14/greenhornd: Buffer overflow into rop chain into shellcode
 
